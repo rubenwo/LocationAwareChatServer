@@ -1,5 +1,6 @@
 package com.Entities;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 public class User {
@@ -19,6 +20,10 @@ public class User {
      *
      */
     private Location location;
+    /**
+     *
+     */
+    private ArrayList<String> imageIDs;
 
     /**
      * @param firstName
@@ -26,11 +31,12 @@ public class User {
      * @param birthday
      * @param location
      */
-    public User(String firstName, String lastName, Date birthday, Location location) {
+    public User(String firstName, String lastName, Date birthday, Location location, ArrayList<String> imageIDs) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.birthday = birthday;
         this.location = location;
+        this.imageIDs = imageIDs;
     }
 
     /**
@@ -87,5 +93,19 @@ public class User {
      */
     public void setLocation(Location location) {
         this.location = location;
+    }
+
+    /**
+     * @return
+     */
+    public ArrayList<String> getImageIDs() {
+        return imageIDs;
+    }
+
+    /**
+     * @param imageIDs
+     */
+    public void setImageIDs(ArrayList<String> imageIDs) {
+        this.imageIDs = imageIDs;
     }
 }

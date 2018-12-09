@@ -12,6 +12,7 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class ConnectionHandler implements Runnable {
     /**
@@ -33,6 +34,10 @@ public class ConnectionHandler implements Runnable {
     /**
      *
      */
+    private ImageClient imageClient;
+    /**
+     *
+     */
     private Account account;
     /**
      *
@@ -45,6 +50,7 @@ public class ConnectionHandler implements Runnable {
     public ConnectionHandler(Socket socket, ArrayList<ConnectionHandler> clients) {
         this.socket = socket;
         this.clients = clients;
+        this.imageClient = ImageClient.getInstance();
         try {
             toClient = new DataOutputStream(this.socket.getOutputStream());
             toClient.flush();
@@ -68,6 +74,12 @@ public class ConnectionHandler implements Runnable {
             IMessage message = getMessage();
 
         }
+    }
+
+    private void uploadImage(byte[] image) {
+        String imageID = "images/" + UUID.randomUUID().toString() + ".jpg";
+        this.imageClient.addImageToUploadQueue(imageID, image);
+        this.account.getUser().getImageIDs().add(imageID);
     }
 
     /**

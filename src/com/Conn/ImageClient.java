@@ -6,8 +6,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class ImageClient {
@@ -38,15 +38,15 @@ public class ImageClient {
     /**
      *
      */
-    private List<byte[]> uploadQueue;
+    private HashMap<String, byte[]> uploadQueue;
 
     /**
      *
      */
     private ImageClient() {
-        uploadQueue = new ArrayList<>();
+        uploadQueue = new HashMap<>();
         try {
-            initializeConnection();
+            createConnection();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -66,7 +66,7 @@ public class ImageClient {
     /**
      * @throws IOException
      */
-    private void initializeConnection() throws IOException {
+    private void createConnection() throws IOException {
         socket = new Socket(Constants.IMAGE_SERVER_HOSTNAME, Constants.IMAGE_SERVER_PORT);
         toImageServer = new DataOutputStream(socket.getOutputStream());
         toImageServer.flush();
@@ -74,29 +74,44 @@ public class ImageClient {
         fromImageServer = new DataInputStream(socket.getInputStream());
     }
 
+    private void closeConnection() throws IOException {
+        toImageServer.flush();
+        toImageServer.close();
+        fromImageServer.close();
+        socket.close();
+    }
+
     /**
      * @param image
      */
-    public void addImageToUploadQueue(byte[] image) {
-        uploadQueue.add(image);
+    public void addImageToUploadQueue(String imageID, byte[] image) {
+        uploadQueue.put(imageID, image);
     }
 
     /**
      *
      */
-    private void writeImageToServer() {
+    private void batchWriteImagesToServer() {
         new Thread(() -> {
-            for (byte[] image : uploadQueue) {
-                uploadImage(image);
+            for (Map.Entry<String, byte[]> entry : uploadQueue.entrySet()) {
+                uploadImage(entry.getKey(), entry.getValue());
             }
         }).start();
     }
 
     /**
+     * @param imageID
      * @param image
      */
-    private void uploadImage(byte[] image) {
-
+    private void uploadImage(String imageID, byte[] image) {
+        try {
+            toImageServer.writeChars(imageID + "\n");
+            toImageServer.flush();
+            toImageServer.write(image, 0, image.length);
+            toImageServer.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
