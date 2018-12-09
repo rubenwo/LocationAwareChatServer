@@ -19,8 +19,8 @@ public class CompressionUtil {
         }
         outputStream.close();
         byte[] output = outputStream.toByteArray();
-        System.out.println("Original: " + data.length / 1024 + " Kb");
-        System.out.println("Compressed: " + output.length / 1024 + " Kb");
+        System.out.println("Original: " + data.length + " bytes");
+        System.out.println("Compressed: " + output.length + " bytes");
         return output;
     }
 
@@ -35,8 +35,8 @@ public class CompressionUtil {
         }
         outputStream.close();
         byte[] output = outputStream.toByteArray();
-        System.out.println("Original: " + data.length);
-        System.out.println("Compressed: " + output.length);
+        System.out.println("Compressed: " + data.length + " bytes");
+        System.out.println("Decompressed: " + output.length + " bytes");
         return output;
     }
 
