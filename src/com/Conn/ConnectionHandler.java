@@ -1,6 +1,7 @@
 package com.Conn;
 
 
+import com.Entities.Account;
 import com.Messages.IMessage;
 import com.Utils.MessageSerializer;
 
@@ -10,8 +11,13 @@ import java.io.IOException;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
 
 public class ConnectionHandler implements Runnable {
+    /**
+     *
+     */
+    private ArrayList<ConnectionHandler> clients;
     /**
      *
      */
@@ -27,13 +33,18 @@ public class ConnectionHandler implements Runnable {
     /**
      *
      */
+    private Account account;
+    /**
+     *
+     */
     private boolean running;
 
     /**
      * @param socket
      */
-    public ConnectionHandler(Socket socket) {
+    public ConnectionHandler(Socket socket, ArrayList<ConnectionHandler> clients) {
         this.socket = socket;
+        this.clients = clients;
         try {
             toClient = new DataOutputStream(this.socket.getOutputStream());
             toClient.flush();
@@ -41,6 +52,10 @@ public class ConnectionHandler implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void updateClients(ArrayList<ConnectionHandler> clients) {
+        this.clients = clients;
     }
 
     /**
@@ -94,7 +109,6 @@ public class ConnectionHandler implements Runnable {
                 e.printStackTrace();
             }
         }
-
         return MessageSerializer.deserialize(data);
     }
 }
