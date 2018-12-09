@@ -1,6 +1,7 @@
 package com.Messages;
 
-import com.ruben.woldhuis.androideindopdrachtapp.Models.Friend;
+
+import com.Entities.Friend;
 
 import java.time.LocalDateTime;
 

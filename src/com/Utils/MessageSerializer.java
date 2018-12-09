@@ -70,7 +70,7 @@ public class MessageSerializer {
             case Identification_Message:
                 return IdentificationMessage.deserialize(data.toString());
             case Location_Message:
-                return LocationMessage.deserialize(data.toString());
+                return null;
         }
         return null;
     }
