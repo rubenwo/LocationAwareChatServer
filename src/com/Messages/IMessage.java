@@ -1,5 +1,8 @@
 package com.Messages;
 
+/**
+ *
+ */
 public interface IMessage {
     /**
      * @return

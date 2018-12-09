@@ -2,7 +2,7 @@ package com.Conn;
 
 
 import com.Messages.IMessage;
-import com.Messages.MessageSerializer;
+import com.Utils.MessageSerializer;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
