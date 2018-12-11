@@ -1,5 +1,7 @@
 package com.Messages;
 
+import com.google.gson.Gson;
+
 import java.time.LocalDateTime;
 
 public class IdentificationMessage implements IMessage {
@@ -44,6 +46,17 @@ public class IdentificationMessage implements IMessage {
 
     @Override
     public String serialize() {
-        return messageType + ";" + sender + ";" + timeSend.toString() + ";" + message;
+        Gson gson = new Gson();
+        return gson.toJson(this);
+    }
+
+    @Override
+    public String toString() {
+        return "IdentificationMessage{" +
+                "messageType=" + messageType +
+                ", sender='" + sender + '\'' +
+                ", timeSend=" + timeSend +
+                ", message='" + message + '\'' +
+                '}';
     }
 }

@@ -1,47 +1,47 @@
 package com.Messages;
 
+import com.Entities.Location;
 import com.google.gson.Gson;
 
 import java.time.LocalDateTime;
 
-public class DisconnectingMessage implements IMessage {
-    private MessageType messageType = MessageType.Disconnecting_Message;
+public class LocationMessage implements IMessage {
+    private MessageType messageType = MessageType.Location_Message;
     private String sender;
     private LocalDateTime timeSend;
     private String message;
+    private Location location;
 
-    /**
-     * @param sender
-     * @param timeSend
-     * @param message
-     */
-    public DisconnectingMessage(String sender, LocalDateTime timeSend, String message) {
+    public LocationMessage(String sender, LocalDateTime timeSend, String message, Location location) {
         this.sender = sender;
         this.timeSend = timeSend;
         this.message = message;
+        this.location = location;
     }
 
-    public static DisconnectingMessage deserialize(String serialized) {
-        String[] items = serialized.split(",");
-
-        return new DisconnectingMessage(items[0], LocalDateTime.parse(items[1]), items[3]);
+    public static LocationMessage deserialize(String serialized) {
+        return null;
     }
 
     @Override
     public MessageType getMessageType() {
-        return messageType;
+        return this.messageType;
     }
 
     public String getSender() {
-        return null;
+        return this.sender;
     }
 
     public LocalDateTime getTimeSend() {
-        return null;
+        return this.timeSend;
     }
 
     public String getMessage() {
-        return null;
+        return this.message;
+    }
+
+    public Location getLocation() {
+        return location;
     }
 
     @Override
@@ -52,11 +52,12 @@ public class DisconnectingMessage implements IMessage {
 
     @Override
     public String toString() {
-        return "DisconnectingMessage{" +
+        return "LocationMessage{" +
                 "messageType=" + messageType +
                 ", sender='" + sender + '\'' +
                 ", timeSend=" + timeSend +
                 ", message='" + message + '\'' +
+                ", location=" + location +
                 '}';
     }
 }
