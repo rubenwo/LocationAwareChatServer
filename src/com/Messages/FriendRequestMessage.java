@@ -22,7 +22,8 @@ public class FriendRequestMessage implements IMessage {
     }
 
     public static FriendRequestMessage deserialize(String serialized) {
-        return null;
+        Gson gson = new Gson();
+        return gson.fromJson(serialized, FriendRequestMessage.class);
     }
 
     @Override

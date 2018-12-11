@@ -1,13 +1,14 @@
 package com.Messages;
 
+import com.Constants;
 import com.google.gson.Gson;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 public class IdentificationMessage implements IMessage {
     private MessageType messageType = MessageType.Identification_Message;
     private String sender;
-    private LocalDateTime timeSend;
+    private Date timeSend;
     private String message;
 
     /**
@@ -15,16 +16,14 @@ public class IdentificationMessage implements IMessage {
      * @param timeSend
      * @param message
      */
-    public IdentificationMessage(String sender, LocalDateTime timeSend, String message) {
+    public IdentificationMessage(String sender, Date timeSend, String message) {
         this.sender = sender;
         this.timeSend = timeSend;
         this.message = message;
     }
 
     public static IdentificationMessage deserialize(String serialized) {
-        String[] items = serialized.split(";");
-
-        return new IdentificationMessage(items[0], LocalDateTime.parse(items[1]), items[3]);
+        return Constants.GSON.fromJson(serialized, IdentificationMessage.class);
     }
 
     @Override
@@ -36,7 +35,7 @@ public class IdentificationMessage implements IMessage {
         return sender;
     }
 
-    public LocalDateTime getTimeSend() {
+    public Date getTimeSend() {
         return timeSend;
     }
 

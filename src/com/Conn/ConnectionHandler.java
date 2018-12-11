@@ -3,6 +3,8 @@ package com.Conn;
 
 import com.Entities.Account;
 import com.Messages.IMessage;
+import com.Messages.LocationMessage;
+import com.Utils.CompressionUtil;
 import com.Utils.MessageSerializer;
 
 import java.io.DataInputStream;
@@ -10,9 +12,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.UUID;
+import java.util.zip.DataFormatException;
 
 public class ConnectionHandler implements Runnable {
     /**
@@ -42,7 +44,7 @@ public class ConnectionHandler implements Runnable {
     /**
      *
      */
-    private boolean running;
+    private boolean running = true;
 
     /**
      * @param socket
@@ -50,11 +52,12 @@ public class ConnectionHandler implements Runnable {
     public ConnectionHandler(Socket socket, ArrayList<ConnectionHandler> clients) {
         this.socket = socket;
         this.clients = clients;
-        this.imageClient = ImageClient.getInstance();
+        //  this.imageClient = ImageClient.getInstance();
         try {
             toClient = new DataOutputStream(this.socket.getOutputStream());
             toClient.flush();
             fromClient = new DataInputStream(this.socket.getInputStream());
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -72,8 +75,23 @@ public class ConnectionHandler implements Runnable {
         while (running) {
             // continuously checks for a message from the client;
             IMessage message = getMessage();
-
+            switch (message.getMessageType()) {
+                case Location_Message:
+                    handleLocationMessage((LocationMessage) message);
+                    break;
+                case Disconnecting_Message:
+                    break;
+                case FriendRequest_Message:
+                    break;
+                case Identification_Message:
+                    break;
+            }
         }
+    }
+
+    private void handleLocationMessage(LocationMessage message) {
+
+        System.out.println(message.toString());
     }
 
     private void uploadImage(byte[] image) {
@@ -89,11 +107,8 @@ public class ConnectionHandler implements Runnable {
      * @return an integer value converted from the byte array
      */
     private int byteArrayToInt(byte[] data) {
-        ByteBuffer intShifter = ByteBuffer.allocate(Integer.SIZE / Byte.SIZE).order(ByteOrder.LITTLE_ENDIAN);
-        intShifter.clear();
-        intShifter.put(data, 0, Integer.SIZE / Byte.SIZE);
-        intShifter.flip();
-        return intShifter.getInt();
+        ByteBuffer wrapped = ByteBuffer.wrap(data);
+        return wrapped.getInt();
     }
 
     /**
@@ -102,7 +117,6 @@ public class ConnectionHandler implements Runnable {
     private IMessage getMessage() {
         byte[] prefix = new byte[4];
         int bytesRead = 0;
-        byte[] data;
 
         while (bytesRead < prefix.length) {
             try {
@@ -111,16 +125,27 @@ public class ConnectionHandler implements Runnable {
                 e.printStackTrace();
             }
         }
+        System.out.println("Got prefix");
         bytesRead = 0;
-        data = new byte[byteArrayToInt(prefix)];
-
-        while (bytesRead < data.length) {
+        byte[] compressedData = new byte[byteArrayToInt(prefix)];
+        while (bytesRead < compressedData.length) {
             try {
-                bytesRead += fromClient.read(prefix, bytesRead, prefix.length - bytesRead);
+                bytesRead += fromClient.read(compressedData, bytesRead, compressedData.length - bytesRead);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+        System.out.println("Got data");
+        String data = null;
+
+        try {
+            data = CompressionUtil.decompress(compressedData);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (DataFormatException e) {
+            e.printStackTrace();
+        }
+
         return MessageSerializer.deserialize(data);
     }
 }

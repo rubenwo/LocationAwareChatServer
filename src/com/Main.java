@@ -1,5 +1,6 @@
 package com;
 
+import com.Conn.Server;
 import com.Entities.Friend;
 import com.Messages.FriendRequestMessage;
 import com.google.gson.Gson;
@@ -37,6 +38,8 @@ public class Main {
         Gson gson = new Gson();
         FriendRequestMessage deser = gson.fromJson(ser, FriendRequestMessage.class);
         System.out.println(deser.toString());
+        Server server = Server.getInstance();
+
     }
 
     public static void main(String[] args) {

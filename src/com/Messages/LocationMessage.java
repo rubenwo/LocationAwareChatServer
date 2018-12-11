@@ -1,18 +1,18 @@
 package com.Messages;
 
+import com.Constants;
 import com.Entities.Location;
-import com.google.gson.Gson;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 public class LocationMessage implements IMessage {
     private MessageType messageType = MessageType.Location_Message;
     private String sender;
-    private LocalDateTime timeSend;
+    private Date timeSend;
     private String message;
     private Location location;
 
-    public LocationMessage(String sender, LocalDateTime timeSend, String message, Location location) {
+    public LocationMessage(String sender, Date timeSend, String message, Location location) {
         this.sender = sender;
         this.timeSend = timeSend;
         this.message = message;
@@ -20,7 +20,7 @@ public class LocationMessage implements IMessage {
     }
 
     public static LocationMessage deserialize(String serialized) {
-        return null;
+        return Constants.GSON.fromJson(serialized, LocationMessage.class);
     }
 
     @Override
@@ -32,7 +32,7 @@ public class LocationMessage implements IMessage {
         return this.sender;
     }
 
-    public LocalDateTime getTimeSend() {
+    public Date getTimeSend() {
         return this.timeSend;
     }
 
@@ -46,8 +46,7 @@ public class LocationMessage implements IMessage {
 
     @Override
     public String serialize() {
-        Gson gson = new Gson();
-        return gson.toJson(this);
+        return Constants.GSON.toJson(this);
     }
 
     @Override

@@ -4,8 +4,6 @@ import com.Messages.*;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.zip.DataFormatException;
 
 public class MessageSerializer {
     /**
@@ -29,48 +27,32 @@ public class MessageSerializer {
         return compressed;
     }
 
-    public static String serializeArrayList(ArrayList<Object> value) {
-        StringBuilder serialized = new StringBuilder();
-        for (int idx = 0; idx < value.size(); idx++)
-            serialized.append("index:" + idx + "," + value.get(idx) + ";");
-        return serialized.toString();
-    }
-
-    public static String serializeArray(Object[] value) {
-        StringBuilder serialized = new StringBuilder();
-        for (int idx = 0; idx < value.length; idx++)
-            serialized.append("index:" + idx + "," + value[idx] + ";");
-        return serialized.toString();
-    }
-
     /**
-     * @param byteData
+     * @param serialized
      * @return
      */
-    public static IMessage deserialize(byte[] byteData) {
-        byte[] decompressed = null;
-        try {
-            decompressed = CompressionUtil.decompress(byteData);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (DataFormatException e) {
-            e.printStackTrace();
+    public static IMessage deserialize(String serialized) {
+        System.out.println(serialized);
+        String[] elements = serialized.split(",");
+        String messageType = "";
+        for (String item : elements) {
+            if (item.contains("messageType")) {
+                messageType = item;
+                break;
+            }
         }
-        String serialized = new String(decompressed);
-        String[] items = serialized.split(",");
-        String type = items[0];
-        StringBuilder data = new StringBuilder();
-        for (int i = 1; i < items.length; i++)
-            data.append(items[i]);
-        switch (MessageType.valueOf(type)) {
+        messageType = messageType.split(":")[1];
+        messageType = messageType.substring(1, messageType.length() - 1);
+        MessageType type = MessageType.valueOf(messageType);
+        switch (type) {
             case FriendRequest_Message:
-                return FriendRequestMessage.deserialize(data.toString());
+                return FriendRequestMessage.deserialize(serialized);
             case Disconnecting_Message:
-                return DisconnectingMessage.deserialize(data.toString());
+                return DisconnectingMessage.deserialize(serialized);
             case Identification_Message:
-                return IdentificationMessage.deserialize(data.toString());
+                return IdentificationMessage.deserialize(serialized);
             case Location_Message:
-                return null;
+                return LocationMessage.deserialize(serialized);
         }
         return null;
     }

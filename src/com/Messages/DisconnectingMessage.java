@@ -22,9 +22,8 @@ public class DisconnectingMessage implements IMessage {
     }
 
     public static DisconnectingMessage deserialize(String serialized) {
-        String[] items = serialized.split(",");
-
-        return new DisconnectingMessage(items[0], LocalDateTime.parse(items[1]), items[3]);
+        Gson gson = new Gson();
+        return gson.fromJson(serialized, DisconnectingMessage.class);
     }
 
     @Override
