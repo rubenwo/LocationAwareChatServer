@@ -3,6 +3,7 @@ package com.Conn;
 
 import com.Entities.Account;
 import com.Messages.IMessage;
+import com.Messages.IdentificationMessage;
 import com.Messages.LocationMessage;
 import com.Utils.CompressionUtil;
 import com.Utils.MessageSerializer;
@@ -13,6 +14,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.UUID;
 import java.util.zip.DataFormatException;
 
@@ -75,16 +77,19 @@ public class ConnectionHandler implements Runnable {
         while (running) {
             // continuously checks for a message from the client;
             IMessage message = getMessage();
-            switch (message.getMessageType()) {
-                case Location_Message:
-                    handleLocationMessage((LocationMessage) message);
-                    break;
-                case Disconnecting_Message:
-                    break;
-                case FriendRequest_Message:
-                    break;
-                case Identification_Message:
-                    break;
+            if (message != null) {
+                switch (message.getMessageType()) {
+                    case Location_Message:
+                        handleLocationMessage((LocationMessage) message);
+                        writeMessage(new IdentificationMessage("Server", new Date(), "Hello from server..."));
+                        break;
+                    case Disconnecting_Message:
+                        break;
+                    case FriendRequest_Message:
+                        break;
+                    case Identification_Message:
+                        break;
+                }
             }
         }
     }
@@ -98,6 +103,16 @@ public class ConnectionHandler implements Runnable {
         String imageID = "images/" + UUID.randomUUID().toString() + ".jpg";
         this.imageClient.addImageToUploadQueue(imageID, image);
         this.account.getUser().getImageIDs().add(imageID);
+    }
+
+    private void writeMessage(IMessage message) {
+        byte[] buffer = MessageSerializer.serialize(message);
+        try {
+            toClient.write(buffer, 0, buffer.length);
+            toClient.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
