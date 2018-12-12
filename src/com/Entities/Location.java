@@ -5,6 +5,9 @@ public class Location {
      *
      */
     private double latitude;
+    /**
+     *
+     */
     private double longitude;
 
     /**
@@ -44,6 +47,9 @@ public class Location {
         this.longitude = longitude;
     }
 
+    /**
+     * @return
+     */
     @Override
     public String toString() {
         return "Location{" +

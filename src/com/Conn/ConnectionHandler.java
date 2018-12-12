@@ -58,7 +58,7 @@ public class ConnectionHandler implements Runnable {
     public ConnectionHandler(Socket socket, ArrayList<ConnectionHandler> clients) {
         this.socket = socket;
         this.clients = clients;
-        //  this.imageClient = ImageClient.getInstance();
+        this.imageClient = ImageClient.getInstance();
         try {
             toClient = new DataOutputStream(this.socket.getOutputStream());
             toClient.flush();
@@ -81,30 +81,34 @@ public class ConnectionHandler implements Runnable {
     public void run() {
         while (running) {
             IMessage message = getMessage();
-            if (message != null) {
-                switch (message.getMessageType()) {
-                    case Location_Message:
-                        messageHandler.handleLocationMessage((LocationMessage) message);
-                        break;
-                    case Disconnecting_Message:
-                        messageHandler.handleDisconnectingMessage((DisconnectingMessage) message);
-                        break;
-                    case FriendRequest_Message:
-                        messageHandler.handleFriendRequestMessage((FriendRequestMessage) message);
-                        break;
-                    case Identification_Message:
-                        messageHandler.handleIdentificationMessage((IdentificationMessage) message);
-                        break;
-                    case FriendRequestAccepted_Message:
-                        messageHandler.handleFriendRequestAcceptedMessage((FriendRequestAcceptedMessage) message);
-                        break;
-                    case Image_Message:
-                        messageHandler.handleImageMessage((ImageMessage) message);
-                        break;
-                }
+            System.out.println(message);
+            if (message == null) {
+                disconnect();
+                break;
+            }
+            switch (message.getMessageType()) {
+                case Location_Message:
+                    messageHandler.handleLocationMessage((LocationMessage) message);
+                    break;
+                case Disconnecting_Message:
+                    messageHandler.handleDisconnectingMessage((DisconnectingMessage) message);
+                    break;
+                case FriendRequest_Message:
+                    messageHandler.handleFriendRequestMessage((FriendRequestMessage) message);
+                    break;
+                case Identification_Message:
+                    messageHandler.handleIdentificationMessage((IdentificationMessage) message);
+                    break;
+                case FriendRequestAccepted_Message:
+                    messageHandler.handleFriendRequestAcceptedMessage((FriendRequestAcceptedMessage) message);
+                    break;
+                case Image_Message:
+                    messageHandler.handleImageMessage((ImageMessage) message);
+                    break;
             }
         }
     }
+
 
     /**
      * @param friend
@@ -148,7 +152,7 @@ public class ConnectionHandler implements Runnable {
             try {
                 bytesRead += fromClient.read(prefix, bytesRead, prefix.length - bytesRead);
             } catch (IOException e) {
-                e.printStackTrace();
+                return null;
             }
         }
         System.out.println("Got prefix");
@@ -158,7 +162,7 @@ public class ConnectionHandler implements Runnable {
             try {
                 bytesRead += fromClient.read(compressedData, bytesRead, compressedData.length - bytesRead);
             } catch (IOException e) {
-                e.printStackTrace();
+                return null;
             }
         }
         System.out.println("Got data");
@@ -179,7 +183,15 @@ public class ConnectionHandler implements Runnable {
      *
      */
     public void disconnect() {
-
+        try {
+            this.running = false;
+            this.toClient.flush();
+            this.toClient.close();
+            this.fromClient.close();
+            this.socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**

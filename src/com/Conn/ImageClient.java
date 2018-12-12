@@ -39,6 +39,7 @@ public class ImageClient {
      *
      */
     private ArrayList<Image> uploadQueue;
+    private Thread uploadThread = null;
 
     /**
      *
@@ -50,8 +51,8 @@ public class ImageClient {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        backgroundTcpListener = new Thread(listenToImageServer());
-        backgroundTcpListener.start();
+        //   backgroundTcpListener = new Thread(listenToImageServer());
+        // backgroundTcpListener.start();
     }
 
     /**
@@ -82,21 +83,38 @@ public class ImageClient {
     }
 
     /**
+     * @param imageID
+     * @param imageExtension
      * @param image
      */
     public void addImageToUploadQueue(String imageID, String imageExtension, byte[] image) {
         uploadQueue.add(new Image(imageID, imageExtension, image));
+        if (uploadThread == null) {
+            uploadThread = new Thread(batchWriteImagesToServer());
+            uploadThread.start();
+        }
     }
 
     /**
-     *
+     * @return
      */
-    private void batchWriteImagesToServer() {
-        new Thread(() -> {
-            for (Image img : uploadQueue) {
+    private Runnable batchWriteImagesToServer() {
+        return () -> {
+            for (Image img : this.uploadQueue) {
+                System.out.println("uploading: " + img.getName());
                 uploadImage(this.toImageServer, img.getName() + img.getExtension(), img.getData());
             }
-        }).start();
+            this.uploadQueue.clear();
+            uploadThread = null;
+        };
+    }
+
+    private static byte[] toByteArray(int value) {
+        return new byte[]{
+                (byte) (value >> 24),
+                (byte) (value >> 16),
+                (byte) (value >> 8),
+                (byte) value};
     }
 
     /**
@@ -109,6 +127,7 @@ public class ImageClient {
             toImageServer.flush();
             toImageServer.write(image, 0, image.length);
             toImageServer.flush();
+            toImageServer.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -121,18 +140,4 @@ public class ImageClient {
 
     }
 
-    /**
-     * @return
-     */
-    private Runnable listenToImageServer() {
-        return () -> {
-            try {
-                while (running) {
-                    fromImageServer.readInt();
-                }
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        };
-    }
 }

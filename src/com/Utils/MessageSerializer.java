@@ -2,6 +2,8 @@ package com.Utils;
 
 import com.Messages.*;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 
 public class MessageSerializer {
@@ -45,10 +47,12 @@ public class MessageSerializer {
      */
     public static IMessage deserialize(String serialized) {
         System.out.println("SERIALIZED:" + serialized);
+
         if (!serialized.equals("")) {
             String[] elements = serialized.split(",");
             String messageType = "";
             for (String item : elements) {
+                System.out.println(item);
                 if (item.contains("messageType")) {
                     messageType = item;
                     break;
@@ -66,6 +70,8 @@ public class MessageSerializer {
                     return IdentificationMessage.deserialize(serialized);
                 case Location_Message:
                     return LocationMessage.deserialize(serialized);
+                case Image_Message:
+                    return ImageMessage.deserialize(serialized);
             }
         }
         return null;

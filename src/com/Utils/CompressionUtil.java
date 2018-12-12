@@ -27,7 +27,7 @@ public class CompressionUtil {
     }
 
     public static String decompress(byte[] data) throws IOException, DataFormatException {
-        String encodedString = java.util.Base64.getEncoder().encodeToString(data);
+       String encodedString = java.util.Base64.getEncoder().encodeToString(data);
         byte[] output = Base64.getDecoder().decode(encodedString);
 
         Inflater inflater = new Inflater();
@@ -39,7 +39,7 @@ public class CompressionUtil {
 
         System.out.println("Compressed: " + data.length + " bytes");
         System.out.println("Decompressed: " + resultLength + " bytes");
-        return new String(result, 0, resultLength, "UTF-8");
+         return new String(result, 0, resultLength, "UTF-8");
     }
 
 }

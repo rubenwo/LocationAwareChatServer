@@ -108,4 +108,11 @@ public class User {
     public void setImageIDs(ArrayList<String> imageIDs) {
         this.imageIDs = imageIDs;
     }
+
+    /**
+     * @param imageID
+     */
+    public void addImageID(String imageID) {
+        this.imageIDs.add(imageID);
+    }
 }

@@ -4,6 +4,7 @@ import com.Entities.Friend;
 import com.Messages.*;
 import com.Utils.ImageUtil;
 
+import java.util.Date;
 import java.util.UUID;
 
 public class MessageHandler {
@@ -69,6 +70,9 @@ public class MessageHandler {
      */
     public void handleImageMessage(ImageMessage message) {
         byte[] image = ImageUtil.toImage(message.getBase64EncodedString());
-        this.client.getImageClient().addImageToUploadQueue(UUID.randomUUID().toString(), message.getExtension(), image);
+        String imageID = UUID.randomUUID().toString();
+    //    this.client.getAccount().getUser().addImageID(imageID + message.getExtension());
+        this.client.getImageClient().addImageToUploadQueue(imageID, message.getExtension(), image);
+        this.client.writeMessage(new ImageResponseMessage(imageID + message.getExtension(), new Date()));
     }
 }

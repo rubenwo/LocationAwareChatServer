@@ -47,7 +47,7 @@ public class Server {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        threadPool = new ThreadPoolExecutor(0, 1500, 60, TimeUnit.SECONDS, new ArrayBlockingQueue<>(2));
+        threadPool = new ThreadPoolExecutor(0, 1500, 60, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(2));
         clients = new ArrayList<>();
         connectionListener = new Thread(listenForTcpConnection());
         connectionListener.start();
