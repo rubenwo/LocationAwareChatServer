@@ -2,9 +2,7 @@ package com.Conn;
 
 
 import com.Entities.Account;
-import com.Messages.IMessage;
-import com.Messages.IdentificationMessage;
-import com.Messages.LocationMessage;
+import com.Messages.*;
 import com.Utils.CompressionUtil;
 import com.Utils.MessageSerializer;
 
@@ -14,11 +12,14 @@ import java.io.IOException;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.UUID;
 import java.util.zip.DataFormatException;
 
 public class ConnectionHandler implements Runnable {
+    /**
+     *
+     */
+    private ArrayList<ConnectionHandler> friends;
     /**
      *
      */
@@ -39,6 +40,10 @@ public class ConnectionHandler implements Runnable {
      *
      */
     private ImageClient imageClient;
+    /**
+     *
+     */
+    private MessageHandler messageHandler;
     /**
      *
      */
@@ -63,6 +68,7 @@ public class ConnectionHandler implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        this.messageHandler = new MessageHandler(this);
     }
 
     public void updateClients(ArrayList<ConnectionHandler> clients) {
@@ -80,23 +86,27 @@ public class ConnectionHandler implements Runnable {
             if (message != null) {
                 switch (message.getMessageType()) {
                     case Location_Message:
-                        handleLocationMessage((LocationMessage) message);
-                        writeMessage(new IdentificationMessage("Server", new Date(), "Hello from server..."));
+                        messageHandler.handleLocationMessage((LocationMessage) message);
                         break;
                     case Disconnecting_Message:
+                        messageHandler.handleDisconnectingMessage((DisconnectingMessage) message);
                         break;
                     case FriendRequest_Message:
+                        messageHandler.handleFriendRequestMessage((FriendRequestMessage) message);
                         break;
                     case Identification_Message:
+                        messageHandler.handleIdentificationMessage((IdentificationMessage) message);
+                        break;
+                    case FriendRequestAccepted_Message:
+                        messageHandler.handleFriendRequestAcceptedMessage((FriendRequestAcceptedMessage) message);
                         break;
                 }
             }
         }
     }
 
-    private void handleLocationMessage(LocationMessage message) {
-
-        System.out.println(message.toString());
+    public void addFriend(ConnectionHandler friend) {
+        this.friends.add(friend);
     }
 
     private void uploadImage(byte[] image) {
@@ -105,7 +115,7 @@ public class ConnectionHandler implements Runnable {
         this.account.getUser().getImageIDs().add(imageID);
     }
 
-    private void writeMessage(IMessage message) {
+    public void writeMessage(IMessage message) {
         byte[] buffer = MessageSerializer.serialize(message);
         try {
             toClient.write(buffer, 0, buffer.length);
@@ -162,5 +172,17 @@ public class ConnectionHandler implements Runnable {
         }
 
         return MessageSerializer.deserialize(data);
+    }
+
+    public void disconnect() {
+
+    }
+
+    public Account getAccount() {
+        return account;
+    }
+
+    public ArrayList<ConnectionHandler> getClients() {
+        return clients;
     }
 }

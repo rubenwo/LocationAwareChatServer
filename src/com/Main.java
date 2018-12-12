@@ -1,12 +1,8 @@
 package com;
 
 import com.Conn.Server;
-import com.Entities.Friend;
-import com.Messages.FriendRequestMessage;
-import com.google.gson.Gson;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class Main {
@@ -32,14 +28,7 @@ public class Main {
      }
      */
     public Main() throws IOException {
-        FriendRequestMessage msg = new FriendRequestMessage("Ruben", LocalDateTime.now(), "Hello there", new Friend());
-        String ser = msg.serialize();
-        System.out.println(ser);
-        Gson gson = new Gson();
-        FriendRequestMessage deser = gson.fromJson(ser, FriendRequestMessage.class);
-        System.out.println(deser.toString());
         Server server = Server.getInstance();
-
     }
 
     public static void main(String[] args) {

@@ -41,6 +41,7 @@ public class Server {
      *
      */
     private Server() {
+        System.out.println("Starting server...");
         try {
             serverSocket = new ServerSocket(Constants.SERVER_PORT, 0, InetAddress.getByName(Constants.SERVER_IP_ADDRESS));
         } catch (IOException e) {
@@ -50,6 +51,7 @@ public class Server {
         clients = new ArrayList<>();
         connectionListener = new Thread(listenForTcpConnection());
         connectionListener.start();
+        System.out.println("Server has started!");
     }
 
     /**

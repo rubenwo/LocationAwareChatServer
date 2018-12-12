@@ -1,7 +1,6 @@
 package com.Messages;
 
 import com.Constants;
-import com.google.gson.Gson;
 
 import java.util.Date;
 
@@ -45,8 +44,7 @@ public class IdentificationMessage implements IMessage {
 
     @Override
     public String serialize() {
-        Gson gson = new Gson();
-        return gson.toJson(this);
+        return Constants.GSON.toJson(this);
     }
 
     @Override

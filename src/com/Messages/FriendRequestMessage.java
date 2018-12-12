@@ -1,20 +1,20 @@
 package com.Messages;
 
 
+import com.Constants;
 import com.Entities.Friend;
-import com.google.gson.Gson;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 public class FriendRequestMessage implements IMessage {
     private MessageType messageType = MessageType.FriendRequest_Message;
     private String sender;
-    private LocalDateTime timeSend;
+    private Date timeSend;
 
     private String message;
     private Friend friend;
 
-    public FriendRequestMessage(String sender, LocalDateTime timeSend, String message, Friend friend) {
+    public FriendRequestMessage(String sender, Date timeSend, String message, Friend friend) {
         this.sender = sender;
         this.timeSend = timeSend;
         this.message = message;
@@ -22,8 +22,7 @@ public class FriendRequestMessage implements IMessage {
     }
 
     public static FriendRequestMessage deserialize(String serialized) {
-        Gson gson = new Gson();
-        return gson.fromJson(serialized, FriendRequestMessage.class);
+        return Constants.GSON.fromJson(serialized, FriendRequestMessage.class);
     }
 
     @Override
@@ -35,7 +34,7 @@ public class FriendRequestMessage implements IMessage {
         return sender;
     }
 
-    public LocalDateTime getTimeSend() {
+    public Date getTimeSend() {
         return timeSend;
     }
 
@@ -49,8 +48,7 @@ public class FriendRequestMessage implements IMessage {
 
     @Override
     public String serialize() {
-        Gson gson = new Gson();
-        return gson.toJson(this);
+        return Constants.GSON.toJson(this);
     }
 
     @Override

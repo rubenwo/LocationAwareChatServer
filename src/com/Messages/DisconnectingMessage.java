@@ -1,13 +1,13 @@
 package com.Messages;
 
-import com.google.gson.Gson;
+import com.Constants;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 public class DisconnectingMessage implements IMessage {
     private MessageType messageType = MessageType.Disconnecting_Message;
     private String sender;
-    private LocalDateTime timeSend;
+    private Date timeSend;
     private String message;
 
     /**
@@ -15,15 +15,14 @@ public class DisconnectingMessage implements IMessage {
      * @param timeSend
      * @param message
      */
-    public DisconnectingMessage(String sender, LocalDateTime timeSend, String message) {
+    public DisconnectingMessage(String sender, Date timeSend, String message) {
         this.sender = sender;
         this.timeSend = timeSend;
         this.message = message;
     }
 
     public static DisconnectingMessage deserialize(String serialized) {
-        Gson gson = new Gson();
-        return gson.fromJson(serialized, DisconnectingMessage.class);
+        return Constants.GSON.fromJson(serialized, DisconnectingMessage.class);
     }
 
     @Override
@@ -35,7 +34,7 @@ public class DisconnectingMessage implements IMessage {
         return null;
     }
 
-    public LocalDateTime getTimeSend() {
+    public Date getTimeSend() {
         return null;
     }
 
@@ -45,8 +44,7 @@ public class DisconnectingMessage implements IMessage {
 
     @Override
     public String serialize() {
-        Gson gson = new Gson();
-        return gson.toJson(this);
+        return Constants.GSON.toJson(this);
     }
 
     @Override
