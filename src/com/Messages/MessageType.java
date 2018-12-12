@@ -8,6 +8,7 @@ public enum MessageType {
     Disconnecting_Message,
     Location_Message,
     FriendRequest_Message,
+    Image_Message,
     FriendRequestAccepted_Message,
 
 }
