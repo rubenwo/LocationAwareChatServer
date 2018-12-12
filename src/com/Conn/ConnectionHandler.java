@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.UUID;
 import java.util.zip.DataFormatException;
 
 public class ConnectionHandler implements Runnable {
@@ -76,12 +75,11 @@ public class ConnectionHandler implements Runnable {
     }
 
     /**
-     *
+     * Continuously checks for a message from the client.
      */
     @Override
     public void run() {
         while (running) {
-            // continuously checks for a message from the client;
             IMessage message = getMessage();
             if (message != null) {
                 switch (message.getMessageType()) {
@@ -100,21 +98,24 @@ public class ConnectionHandler implements Runnable {
                     case FriendRequestAccepted_Message:
                         messageHandler.handleFriendRequestAcceptedMessage((FriendRequestAcceptedMessage) message);
                         break;
+                    case Image_Message:
+                        messageHandler.handleImageMessage((ImageMessage) message);
+                        break;
                 }
             }
         }
     }
 
+    /**
+     * @param friend
+     */
     public void addFriend(ConnectionHandler friend) {
         this.friends.add(friend);
     }
 
-    private void uploadImage(byte[] image) {
-        String imageID = "images/" + UUID.randomUUID().toString() + ".jpg";
-        this.imageClient.addImageToUploadQueue(imageID, image);
-        this.account.getUser().getImageIDs().add(imageID);
-    }
-
+    /**
+     * @param message
+     */
     public void writeMessage(IMessage message) {
         byte[] buffer = MessageSerializer.serialize(message);
         try {
@@ -174,15 +175,31 @@ public class ConnectionHandler implements Runnable {
         return MessageSerializer.deserialize(data);
     }
 
+    /**
+     *
+     */
     public void disconnect() {
 
     }
 
+    /**
+     * @return
+     */
     public Account getAccount() {
         return account;
     }
 
+    /**
+     * @return
+     */
     public ArrayList<ConnectionHandler> getClients() {
         return clients;
+    }
+
+    /**
+     * @return
+     */
+    public ImageClient getImageClient() {
+        return imageClient;
     }
 }

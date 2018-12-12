@@ -1,20 +1,20 @@
 package com.Conn;
 
 import com.Constants;
+import com.Entities.Image;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
 
 
 public class ImageClient {
     /**
      *
      */
-    private static ImageClient instance;
+    private static volatile ImageClient instance;
     /**
      *
      */
@@ -34,17 +34,17 @@ public class ImageClient {
     /**
      *
      */
-    private boolean running;
+    private boolean running = true;
     /**
      *
      */
-    private HashMap<String, byte[]> uploadQueue;
+    private ArrayList<Image> uploadQueue;
 
     /**
      *
      */
     private ImageClient() {
-        uploadQueue = new HashMap<>();
+        uploadQueue = new ArrayList<>();
         try {
             createConnection();
         } catch (IOException e) {
@@ -84,8 +84,8 @@ public class ImageClient {
     /**
      * @param image
      */
-    public void addImageToUploadQueue(String imageID, byte[] image) {
-        uploadQueue.put(imageID, image);
+    public void addImageToUploadQueue(String imageID, String imageExtension, byte[] image) {
+        uploadQueue.add(new Image(imageID, imageExtension, image));
     }
 
     /**
@@ -93,8 +93,8 @@ public class ImageClient {
      */
     private void batchWriteImagesToServer() {
         new Thread(() -> {
-            for (Map.Entry<String, byte[]> entry : uploadQueue.entrySet()) {
-                uploadImage(entry.getKey(), entry.getValue());
+            for (Image img : uploadQueue) {
+                uploadImage(this.toImageServer, img.getName() + img.getExtension(), img.getData());
             }
         }).start();
     }
@@ -103,7 +103,7 @@ public class ImageClient {
      * @param imageID
      * @param image
      */
-    private void uploadImage(String imageID, byte[] image) {
+    private void uploadImage(DataOutputStream toImageServer, String imageID, byte[] image) {
         try {
             toImageServer.writeChars(imageID + "\n");
             toImageServer.flush();
