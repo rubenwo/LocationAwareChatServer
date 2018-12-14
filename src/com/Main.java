@@ -1,16 +1,9 @@
 package com;
 
-import com.Conn.ImageClient;
+import com.Conn.Server;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.File;
 import java.io.IOException;
-import java.net.Socket;
 import java.util.ArrayList;
-import java.util.UUID;
 
 public class Main {
     private static ArrayList<String> strings;
@@ -35,7 +28,8 @@ public class Main {
      }*/
 
     public Main() throws IOException {
-        //Server server = Server.getInstance();
+        Server server = Server.getInstance();
+        /*
         BufferedImage img = ImageIO.read(new File("C:/Users/diabl/Documents/background.jpg"));
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ImageIO.write(img, "jpg", baos);
@@ -44,7 +38,7 @@ public class Main {
         baos.close();
 
         ImageClient client = ImageClient.getInstance();
-        client.addImageToUploadQueue(UUID.randomUUID().toString(), ".jpg", data);
+        client.addImageToUploadQueue(UUID.randomUUID().toString(), ".jpg", data);*/
     }
 
     public static void main(String[] args) {

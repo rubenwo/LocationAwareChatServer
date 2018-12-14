@@ -46,12 +46,8 @@ public class ImageClient {
      */
     private ImageClient() {
         uploadQueue = new ArrayList<>();
-        try {
-            createConnection();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        //   backgroundTcpListener = new Thread(listenToImageServer());
+
+        // backgroundTcpListener = new Thread(listenToImageServer());
         // backgroundTcpListener.start();
     }
 
@@ -87,7 +83,7 @@ public class ImageClient {
      * @param imageExtension
      * @param image
      */
-    public void addImageToUploadQueue(String imageID, String imageExtension, byte[] image) {
+    public synchronized void addImageToUploadQueue(String imageID, String imageExtension, byte[] image) {
         uploadQueue.add(new Image(imageID, imageExtension, image));
         if (uploadThread == null) {
             uploadThread = new Thread(batchWriteImagesToServer());
@@ -100,9 +96,19 @@ public class ImageClient {
      */
     private Runnable batchWriteImagesToServer() {
         return () -> {
+            try {
+                this.createConnection();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             for (Image img : this.uploadQueue) {
                 System.out.println("uploading: " + img.getName());
                 uploadImage(this.toImageServer, img.getName() + img.getExtension(), img.getData());
+            }
+            try {
+                this.closeConnection();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
             this.uploadQueue.clear();
             uploadThread = null;

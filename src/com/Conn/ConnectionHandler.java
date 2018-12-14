@@ -9,6 +9,7 @@ import com.Utils.MessageSerializer;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -167,16 +168,21 @@ public class ConnectionHandler implements Runnable {
         }
         System.out.println("Got data");
         String data = null;
-
+/*
         try {
             data = CompressionUtil.decompress(compressedData);
         } catch (IOException e) {
             e.printStackTrace();
         } catch (DataFormatException e) {
             e.printStackTrace();
+        }*/
+        String ser = "";
+        try {
+            ser = new String(compressedData, 0, compressedData.length, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
         }
-
-        return MessageSerializer.deserialize(data);
+        return MessageSerializer.deserialize(ser);
     }
 
     /**
