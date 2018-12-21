@@ -2,6 +2,8 @@ package com;
 
 import com.google.gson.Gson;
 
+import java.text.SimpleDateFormat;
+
 public class Constants {
     /**
      *
@@ -12,7 +14,7 @@ public class Constants {
     /**
      *
      */
-    public static final String IMAGE_SERVER_HOSTNAME = "localhost";
+    public static final String IMAGE_SERVER_HOSTNAME = "206.189.3.15";
     /**
      *
      */
@@ -22,7 +24,7 @@ public class Constants {
     /**
      *
      */
-    public static final String SERVER_IP_ADDRESS = "localhost";
+    public static final String SERVER_IP_ADDRESS = "192.168.2.125";
     /**
      *
      */
@@ -31,5 +33,5 @@ public class Constants {
      *
      */
     public static final Gson GSON = new Gson();
-
+    public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 }

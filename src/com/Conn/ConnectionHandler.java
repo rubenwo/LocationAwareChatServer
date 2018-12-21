@@ -3,7 +3,6 @@ package com.Conn;
 
 import com.Entities.Account;
 import com.Messages.*;
-import com.Utils.CompressionUtil;
 import com.Utils.MessageSerializer;
 
 import java.io.DataInputStream;
@@ -12,18 +11,13 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.zip.DataFormatException;
+import java.util.HashMap;
 
 public class ConnectionHandler implements Runnable {
     /**
      *
      */
-    private ArrayList<ConnectionHandler> friends;
-    /**
-     *
-     */
-    private ArrayList<ConnectionHandler> clients;
+    private HashMap<String, ConnectionHandler> clients;
     /**
      *
      */
@@ -56,7 +50,7 @@ public class ConnectionHandler implements Runnable {
     /**
      * @param socket
      */
-    public ConnectionHandler(Socket socket, ArrayList<ConnectionHandler> clients) {
+    public ConnectionHandler(Socket socket, HashMap<String, ConnectionHandler> clients) {
         this.socket = socket;
         this.clients = clients;
         this.imageClient = ImageClient.getInstance();
@@ -69,10 +63,6 @@ public class ConnectionHandler implements Runnable {
             e.printStackTrace();
         }
         this.messageHandler = new MessageHandler(this);
-    }
-
-    public void updateClients(ArrayList<ConnectionHandler> clients) {
-        this.clients = clients;
     }
 
     /**
@@ -112,16 +102,10 @@ public class ConnectionHandler implements Runnable {
 
 
     /**
-     * @param friend
-     */
-    public void addFriend(ConnectionHandler friend) {
-        this.friends.add(friend);
-    }
-
-    /**
      * @param message
      */
     public void writeMessage(IMessage message) {
+        System.out.println("SENDING: " + message.serialize());
         byte[] buffer = MessageSerializer.serialize(message);
         try {
             toClient.write(buffer, 0, buffer.length);
@@ -210,7 +194,7 @@ public class ConnectionHandler implements Runnable {
     /**
      * @return
      */
-    public ArrayList<ConnectionHandler> getClients() {
+    public HashMap<String, ConnectionHandler> getClients() {
         return clients;
     }
 

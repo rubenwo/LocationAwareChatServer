@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -23,7 +23,7 @@ public class Server {
     /**
      *
      */
-    private ArrayList<ConnectionHandler> clients;
+    private HashMap<String, ConnectionHandler> clients;
     /**
      *
      */
@@ -47,8 +47,8 @@ public class Server {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        threadPool = new ThreadPoolExecutor(0, 1500, 60, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(2));
-        clients = new ArrayList<>();
+        threadPool = new ThreadPoolExecutor(0, 1500, 60, TimeUnit.DAYS, new ArrayBlockingQueue<>(2));
+        clients = new HashMap<>();
         connectionListener = new Thread(listenForTcpConnection());
         connectionListener.start();
         System.out.println("Server has started!");
@@ -78,16 +78,9 @@ public class Server {
                 }
                 if (socket != null) {
                     ConnectionHandler client = new ConnectionHandler(socket, clients);
-                    updateClients(client);
                     threadPool.execute(client);
                 }
             }
         };
-    }
-
-    private void updateClients(ConnectionHandler client) {
-        this.clients.add(client);
-        for (ConnectionHandler handler : clients)
-            handler.updateClients(this.clients);
     }
 }

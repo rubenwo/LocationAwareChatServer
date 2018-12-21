@@ -23,7 +23,7 @@ public class CompressionUtil {
         byte[] output = outputStream.toByteArray();
         System.out.println("Original: " + data.length + " bytes");
         System.out.println("Compressed: " + output.length + " bytes");
-        return output;
+        return data;
     }
 
     public static String decompress(byte[] data) throws IOException, DataFormatException {

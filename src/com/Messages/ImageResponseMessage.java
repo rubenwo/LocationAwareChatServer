@@ -6,12 +6,16 @@ import java.util.Date;
 
 public class ImageResponseMessage implements IMessage {
     private MessageType messageType = MessageType.ImageResponse_Message;
-    private String imageID;
+    private String imageUrl;
     private Date timeSend;
 
-    public ImageResponseMessage(String imageID, Date timeSend) {
-        this.imageID = imageID;
+    public ImageResponseMessage(String imageUrl, Date timeSend) {
+        this.imageUrl = imageUrl;
         this.timeSend = timeSend;
+    }
+
+    public static ImageResponseMessage deserialize(String serialized) {
+        return Constants.GSON.fromJson(serialized, ImageResponseMessage.class);
     }
 
     @Override
@@ -19,8 +23,8 @@ public class ImageResponseMessage implements IMessage {
         return messageType;
     }
 
-    public String getImageID() {
-        return imageID;
+    public String getImageUrl() {
+        return imageUrl;
     }
 
     public Date getTimeSend() {

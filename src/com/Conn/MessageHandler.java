@@ -1,6 +1,6 @@
 package com.Conn;
 
-import com.Entities.Friend;
+import com.Constants;
 import com.Messages.*;
 import com.Utils.ImageUtil;
 
@@ -31,24 +31,14 @@ public class MessageHandler {
      * @param message
      */
     public void handleFriendRequestMessage(FriendRequestMessage message) {
-        for (ConnectionHandler connection : this.client.getClients()) {
-            if (connection.getAccount().getUsername().equals(message.getFriend().getUsername())) {
-                connection.writeMessage(new FriendRequestMessage(message.getSender(), message.getTimeSend(), message.getMessage(), new Friend(message.getSender())));
-                return;
-            }
-        }
+
     }
 
     /**
      * @param message
      */
     public void handleFriendRequestAcceptedMessage(FriendRequestAcceptedMessage message) {
-        for (ConnectionHandler connection : this.client.getClients()) {
-            if (connection.getAccount().getUsername().equals(message.getFriendName()) && message.isAccepted()) {
-                this.client.addFriend(connection);
-                return;
-            }
-        }
+
     }
 
     /**
@@ -71,8 +61,8 @@ public class MessageHandler {
     public void handleImageMessage(ImageMessage message) {
         byte[] image = ImageUtil.toImage(message.getBase64EncodedString());
         String imageID = UUID.randomUUID().toString();
-    //    this.client.getAccount().getUser().addImageID(imageID + message.getExtension());
+        //    this.client.getAccount().getUser().addImageID(imageID + message.getExtension());
         this.client.getImageClient().addImageToUploadQueue(imageID, message.getExtension(), image);
-        this.client.writeMessage(new ImageResponseMessage(imageID + message.getExtension(), new Date()));
+        this.client.writeMessage(new ImageResponseMessage(Constants.IMAGE_SERVER_HOSTNAME + "/images/" + imageID + message.getExtension(), new Date()));
     }
 }

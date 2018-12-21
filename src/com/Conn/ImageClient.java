@@ -39,6 +39,7 @@ public class ImageClient {
      *
      */
     private ArrayList<Image> uploadQueue;
+    private ArrayList<Image> uploadProcessing;
     private Thread uploadThread = null;
 
     /**
@@ -46,7 +47,7 @@ public class ImageClient {
      */
     private ImageClient() {
         uploadQueue = new ArrayList<>();
-
+        uploadProcessing = new ArrayList<>();
         // backgroundTcpListener = new Thread(listenToImageServer());
         // backgroundTcpListener.start();
     }
@@ -86,6 +87,8 @@ public class ImageClient {
     public synchronized void addImageToUploadQueue(String imageID, String imageExtension, byte[] image) {
         uploadQueue.add(new Image(imageID, imageExtension, image));
         if (uploadThread == null) {
+            uploadProcessing.addAll(uploadQueue);
+            this.uploadQueue.clear();
             uploadThread = new Thread(batchWriteImagesToServer());
             uploadThread.start();
         }
@@ -101,16 +104,16 @@ public class ImageClient {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            for (Image img : this.uploadQueue) {
+            for (Image img : this.uploadProcessing) {
                 System.out.println("uploading: " + img.getName());
-                uploadImage(this.toImageServer, img.getName() + img.getExtension(), img.getData());
+                uploadImage(this, img);
             }
             try {
                 this.closeConnection();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            this.uploadQueue.clear();
+            this.uploadProcessing.clear();
             uploadThread = null;
         };
     }
@@ -124,16 +127,20 @@ public class ImageClient {
     }
 
     /**
-     * @param imageID
+     * @param imageClient
      * @param image
+     * @return
      */
-    private void uploadImage(DataOutputStream toImageServer, String imageID, byte[] image) {
+    private void uploadImage(ImageClient imageClient, Image image) {
+        String imageID = image.getName() + image.getExtension();
+        byte[] data = image.getData();
         try {
-            toImageServer.writeChars(imageID + "\n");
-            toImageServer.flush();
-            toImageServer.write(image, 0, image.length);
-            toImageServer.flush();
-            toImageServer.close();
+            imageClient.createConnection();
+            imageClient.toImageServer.writeChars(imageID + "\n");
+            imageClient.toImageServer.flush();
+            imageClient.toImageServer.write(data, 0, data.length);
+            imageClient.toImageServer.flush();
+            imageClient.closeConnection();
         } catch (IOException e) {
             e.printStackTrace();
         }
