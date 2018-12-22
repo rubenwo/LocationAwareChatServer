@@ -6,8 +6,8 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashMap;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -23,7 +23,7 @@ public class Server {
     /**
      *
      */
-    private HashMap<String, ConnectionHandler> clients;
+    private ConcurrentHashMap<String, ConnectionHandler> clients;
     /**
      *
      */
@@ -48,7 +48,7 @@ public class Server {
             e.printStackTrace();
         }
         threadPool = new ThreadPoolExecutor(0, 1500, 60, TimeUnit.DAYS, new ArrayBlockingQueue<>(2));
-        clients = new HashMap<>();
+        clients = new ConcurrentHashMap<>();
         connectionListener = new Thread(listenForTcpConnection());
         connectionListener.start();
         System.out.println("Server has started!");

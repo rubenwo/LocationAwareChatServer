@@ -11,13 +11,13 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.nio.ByteBuffer;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ConnectionHandler implements Runnable {
     /**
      *
      */
-    private HashMap<String, ConnectionHandler> clients;
+    private ConcurrentHashMap<String, ConnectionHandler> clients;
     /**
      *
      */
@@ -50,7 +50,7 @@ public class ConnectionHandler implements Runnable {
     /**
      * @param socket
      */
-    public ConnectionHandler(Socket socket, HashMap<String, ConnectionHandler> clients) {
+    public ConnectionHandler(Socket socket, ConcurrentHashMap<String, ConnectionHandler> clients) {
         this.socket = socket;
         this.clients = clients;
         this.imageClient = ImageClient.getInstance();
@@ -194,7 +194,7 @@ public class ConnectionHandler implements Runnable {
     /**
      * @return
      */
-    public HashMap<String, ConnectionHandler> getClients() {
+    public ConcurrentHashMap<String, ConnectionHandler> getClients() {
         return clients;
     }
 
