@@ -1,7 +1,12 @@
 package com.Conn;
 
 import com.Constants;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -21,7 +26,7 @@ public class Server {
      */
     private ThreadPoolExecutor threadPool;
     /**
-     *
+     * Concurrent HashMap. Key is the uid of an authenticated user. Value is the connected connection handler.
      */
     private ConcurrentHashMap<String, ConnectionHandler> clients;
     /**
@@ -41,6 +46,18 @@ public class Server {
      *
      */
     private Server() {
+        try {
+            FileInputStream serviceAccount = new FileInputStream(getClass().getResource("/locationawareapp-d4ad4-firebase-adminsdk-sjzdi-569d413b69.json").getFile());
+
+            FirebaseOptions options = new FirebaseOptions.Builder()
+                    .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                    .setDatabaseUrl("https://locationawareapp-d4ad4.firebaseio.com")
+                    .build();
+
+            FirebaseApp.initializeApp(options);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         System.out.println("Starting server...");
         try {
             serverSocket = new ServerSocket(Constants.SERVER_PORT, 0, InetAddress.getByName(Constants.SERVER_IP_ADDRESS));

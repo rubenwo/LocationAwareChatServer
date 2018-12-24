@@ -1,68 +1,58 @@
 package com.Conn;
 
-import com.Constants;
-import com.Messages.*;
-import com.Utils.ImageUtil;
 
-import java.util.Date;
-import java.util.UUID;
+import com.Entities.Image;
+import com.Entities.User;
+import com.Listeners.MessageCallback;
+import com.MessagingProtocol.Messages.*;
+import com.Services.UserAuthenticationService;
+
+import java.util.Base64;
+import java.util.concurrent.CompletableFuture;
 
 public class MessageHandler {
-    /**
-     *
-     */
-    private ConnectionHandler client;
+    private MessageCallback callback;
 
-    /**
-     * @param client
-     */
-    public MessageHandler(ConnectionHandler client) {
-        this.client = client;
+    public MessageHandler(MessageCallback callback) {
+        this.callback = callback;
     }
 
-    /**
-     * @param message
-     */
-    public void handleDisconnectingMessage(DisconnectingMessage message) {
-        this.client.disconnect();
-    }
-
-    /**
-     * @param message
-     */
-    public void handleFriendRequestMessage(FriendRequestMessage message) {
-
-    }
-
-    /**
-     * @param message
-     */
-    public void handleFriendRequestAcceptedMessage(FriendRequestAcceptedMessage message) {
-
-    }
-
-    /**
-     * @param message
-     */
     public void handleIdentificationMessage(IdentificationMessage message) {
+        CompletableFuture.runAsync(() -> {
+            User authenticatedUser = UserAuthenticationService.authenticate(message.getFireBaseToken());
+            callback.onIdentificationMessage(authenticatedUser);
+        });
 
     }
 
-    /**
-     * @param message
-     */
-    public void handleLocationMessage(LocationMessage message) {
-
-    }
-
-    /**
-     * @param message
-     */
     public void handleImageMessage(ImageMessage message) {
-        byte[] image = ImageUtil.toImage(message.getBase64EncodedString());
-        String imageID = UUID.randomUUID().toString();
-        //    this.client.getAccount().getUser().addImageID(imageID + message.getExtension());
-        this.client.getImageClient().addImageToUploadQueue(imageID, message.getExtension(), image);
-        this.client.writeMessage(new ImageResponseMessage(Constants.IMAGE_SERVER_HOSTNAME + "/images/" + imageID + message.getExtension(), new Date()));
+        CompletableFuture.runAsync(() -> {
+            byte[] imageData = Base64.getDecoder().decode(message.getBase64EncodedImage());
+            callback.onImageMessage(new Image(message.getImageName(), message.getImageExtension(), imageData), message.getTarget());
+        });
+    }
+
+    public void handleLocationUpdateMessage(LocationUpdateMessage message) {
+        CompletableFuture.runAsync(() -> {
+            callback.onLocationUpdateMessage(message.getLocation());
+        });
+    }
+
+    public void handleTextMessage(TextMessage message) {
+        CompletableFuture.runAsync(() -> {
+            callback.onTextMessage(message.getTextMessage(), message.getTarget());
+        });
+    }
+
+    public void handleSignOutMessage(SignOutMessage message) {
+        CompletableFuture.runAsync(() -> {
+            callback.onSignOutMessage(message.isSignOut());
+        });
+    }
+
+    public void handleAudioMessage(AudioMessage message) {
+        CompletableFuture.runAsync(() -> {
+            callback.onAudioMessage(message.getBase64EncodedAudio(), message.getTarget());
+        });
     }
 }

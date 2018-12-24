@@ -1,6 +1,8 @@
 package com.Utils;
 
-import com.Messages.*;
+import com.MessagingProtocol.IMessage;
+import com.MessagingProtocol.MessageType;
+import com.MessagingProtocol.Messages.*;
 
 import java.io.IOException;
 
@@ -18,7 +20,7 @@ public class MessageSerializer {
      * @return
      */
     public static byte[] serialize(IMessage message) {
-        String msg = message.serialize();
+        String msg = message.toJson();
         System.out.println(msg);
         byte[] compressedData = null;
 
@@ -40,14 +42,14 @@ public class MessageSerializer {
     }
 
     /**
-     * @param serialized
+     * @param json
      * @return
      */
-    public static IMessage deserialize(String serialized) {
-        System.out.println("SERIALIZED:" + serialized);
+    public static IMessage deserialize(String json) {
+        System.out.println("SERIALIZED:" + json);
 
-        if (!serialized.equals("")) {
-            String[] elements = serialized.split(",");
+        if (!json.equals("")) {
+            String[] elements = json.split(",");
             String messageType = "";
             for (String item : elements) {
                 System.out.println(item);
@@ -60,16 +62,18 @@ public class MessageSerializer {
             messageType = messageType.substring(1, messageType.length() - 1);
             MessageType type = MessageType.valueOf(messageType);
             switch (type) {
-                case FriendRequest_Message:
-                    return FriendRequestMessage.deserialize(serialized);
-                case Disconnecting_Message:
-                    return DisconnectingMessage.deserialize(serialized);
+                case LocationUpdate_Message:
+                    return LocationUpdateMessage.deserialize(json);
+                case SignOut_Message:
+                    return SignOutMessage.deserialize(json);
+                case Audio_Message:
+                    return AudioMessage.deserialize(json);
+                case Text_Message:
+                    return TextMessage.deserialize(json);
                 case Identification_Message:
-                    return IdentificationMessage.deserialize(serialized);
-                case Location_Message:
-                    return LocationMessage.deserialize(serialized);
+                    return IdentificationMessage.deserialize(json);
                 case Image_Message:
-                    return ImageMessage.deserialize(serialized);
+                    return ImageMessage.deserialize(json);
             }
         }
         return null;

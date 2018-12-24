@@ -1,6 +1,7 @@
 package com.Listeners;
 
-import com.Messages.IMessage;
+
+import com.MessagingProtocol.IMessage;
 
 public interface MessageListener {
     /**

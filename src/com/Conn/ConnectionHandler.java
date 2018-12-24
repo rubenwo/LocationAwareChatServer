@@ -2,7 +2,12 @@ package com.Conn;
 
 
 import com.Entities.Account;
-import com.Messages.*;
+import com.Entities.Image;
+import com.Entities.Location;
+import com.Entities.User;
+import com.Listeners.MessageCallback;
+import com.MessagingProtocol.IMessage;
+import com.MessagingProtocol.Messages.*;
 import com.Utils.MessageSerializer;
 
 import java.io.DataInputStream;
@@ -12,6 +17,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.concurrent.ConcurrentHashMap;
+
 
 public class ConnectionHandler implements Runnable {
     /**
@@ -62,7 +68,37 @@ public class ConnectionHandler implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        this.messageHandler = new MessageHandler(this);
+        this.messageHandler = new MessageHandler(new MessageCallback() {
+            @Override
+            public void onIdentificationMessage(User authenticatedUser) {
+
+            }
+
+            @Override
+            public void onImageMessage(Image image, User target) {
+
+            }
+
+            @Override
+            public void onAudioMessage(String base64EncodedAudio, User target) {
+
+            }
+
+            @Override
+            public void onLocationUpdateMessage(Location location) {
+
+            }
+
+            @Override
+            public void onTextMessage(String textMessage, User target) {
+
+            }
+
+            @Override
+            public void onSignOutMessage(boolean signOut) {
+
+            }
+        });
     }
 
     /**
@@ -72,29 +108,26 @@ public class ConnectionHandler implements Runnable {
     public void run() {
         while (running) {
             IMessage message = getMessage();
-            System.out.println(message);
-            if (message == null) {
-                disconnect();
-                break;
-            }
+            if (message == null)
+                return;
             switch (message.getMessageType()) {
-                case Location_Message:
-                    messageHandler.handleLocationMessage((LocationMessage) message);
-                    break;
-                case Disconnecting_Message:
-                    messageHandler.handleDisconnectingMessage((DisconnectingMessage) message);
-                    break;
-                case FriendRequest_Message:
-                    messageHandler.handleFriendRequestMessage((FriendRequestMessage) message);
+                case Image_Message:
+                    messageHandler.handleImageMessage((ImageMessage) message);
                     break;
                 case Identification_Message:
                     messageHandler.handleIdentificationMessage((IdentificationMessage) message);
                     break;
-                case FriendRequestAccepted_Message:
-                    messageHandler.handleFriendRequestAcceptedMessage((FriendRequestAcceptedMessage) message);
+                case Text_Message:
+                    messageHandler.handleTextMessage((TextMessage) message);
                     break;
-                case Image_Message:
-                    messageHandler.handleImageMessage((ImageMessage) message);
+                case Audio_Message:
+                    messageHandler.handleAudioMessage((AudioMessage) message);
+                    break;
+                case SignOut_Message:
+                    messageHandler.handleSignOutMessage((SignOutMessage) message);
+                    break;
+                case LocationUpdate_Message:
+                    messageHandler.handleLocationUpdateMessage((LocationUpdateMessage) message);
                     break;
             }
         }
@@ -105,7 +138,7 @@ public class ConnectionHandler implements Runnable {
      * @param message
      */
     public void writeMessage(IMessage message) {
-        System.out.println("SENDING: " + message.serialize());
+        System.out.println("SENDING: " + message.toJson());
         byte[] buffer = MessageSerializer.serialize(message);
         try {
             toClient.write(buffer, 0, buffer.length);
