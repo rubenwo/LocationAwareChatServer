@@ -3,6 +3,7 @@ package com.Utils;
 import com.MessagingProtocol.IMessage;
 import com.MessagingProtocol.MessageType;
 import com.MessagingProtocol.Messages.*;
+import org.json.JSONObject;
 
 import java.io.IOException;
 
@@ -47,19 +48,11 @@ public class MessageSerializer {
      */
     public static IMessage deserialize(String json) {
         System.out.println("SERIALIZED:" + json);
+        if (!json.isEmpty()) {
+            JSONObject obj = new JSONObject(json);
+            String messageType = obj.getString("messageType");
 
-        if (!json.equals("")) {
-            String[] elements = json.split(",");
-            String messageType = "";
-            for (String item : elements) {
-                System.out.println(item);
-                if (item.contains("messageType")) {
-                    messageType = item;
-                    break;
-                }
-            }
-            messageType = messageType.split(":")[1];
-            messageType = messageType.substring(1, messageType.length() - 1);
+            System.out.println(messageType);
             MessageType type = MessageType.valueOf(messageType);
             switch (type) {
                 case LocationUpdate_Message:

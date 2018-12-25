@@ -51,6 +51,10 @@ public class ConnectionHandler implements Runnable {
     /**
      *
      */
+    private User user;
+    /**
+     *
+     */
     private boolean running = true;
 
     /**
@@ -72,32 +76,40 @@ public class ConnectionHandler implements Runnable {
         this.messageHandler = new MessageHandler(new MessageCallback() {
             @Override
             public void onIdentificationMessage(User authenticatedUser) {
-
+                clients.put(authenticatedUser.getUid(), ConnectionHandler.this);
+                user = authenticatedUser;
+                System.out.println(user.toString());
             }
 
             @Override
             public void onImageMessage(Image image, User target) {
-
+                imageClient.addImageToUploadQueue(image.getName(), image.getExtension(), image.getData());
+                if (clients.containsKey(target.getUid()))
+                    clients.get(target.getUid()).writeMessage(new ImageUploadedMessage("SERVER", "http://206.189.3.15/images/" + image.getName() + image.getExtension()));
+                writeMessage(new ImageUploadedMessage("SERVER", "http://206.189.3.15/images/" + image.getName() + image.getExtension()));
             }
 
             @Override
             public void onAudioMessage(String base64EncodedAudio, User target) {
-
+                if (clients.containsKey(target.getUid()))
+                    clients.get(target.getUid()).writeMessage(new AudioMessage("SERVER", base64EncodedAudio, null));
             }
 
             @Override
             public void onLocationUpdateMessage(Location location) {
-
+                user.setLocation(location);
             }
 
             @Override
             public void onTextMessage(String textMessage, User target) {
-
+                if (clients.containsKey(target.getUid()))
+                    clients.get(target.getUid()).writeMessage(new TextMessage("SERVER", textMessage, null));
             }
 
             @Override
             public void onSignOutMessage(boolean signOut) {
-
+                if (signOut)
+                    disconnect();
             }
         });
     }
@@ -133,7 +145,6 @@ public class ConnectionHandler implements Runnable {
             }
         }
     }
-
 
     /**
      * @param message
