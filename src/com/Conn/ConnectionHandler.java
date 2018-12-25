@@ -55,6 +55,7 @@ public class ConnectionHandler implements Runnable {
 
     /**
      * @param socket
+     * @param clients
      */
     public ConnectionHandler(Socket socket, ConcurrentHashMap<String, ConnectionHandler> clients) {
         this.socket = socket;
