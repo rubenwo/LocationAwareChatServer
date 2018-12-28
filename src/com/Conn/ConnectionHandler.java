@@ -122,8 +122,10 @@ public class ConnectionHandler implements Runnable {
     public void run() {
         while (running) {
             IMessage message = getMessage();
-            if (message == null)
+            if (message == null) {
+                disconnect();
                 return;
+            }
             switch (message.getMessageType()) {
                 case Image_Message:
                     messageHandler.handleImageMessage((ImageMessage) message);
@@ -182,11 +184,14 @@ public class ConnectionHandler implements Runnable {
         while (bytesRead < prefix.length) {
             try {
                 bytesRead += fromClient.read(prefix, bytesRead, prefix.length - bytesRead);
+                if (bytesRead < 0)
+                    return null;
+                System.out.println("Reading bytes: " + bytesRead);
             } catch (IOException e) {
                 return null;
             }
         }
-        System.out.println("Got prefix");
+        System.out.println("Got prefix: " + prefix.length + " Bytes.");
         bytesRead = 0;
         byte[] compressedData = new byte[byteArrayToInt(prefix)];
         while (bytesRead < compressedData.length) {
@@ -219,15 +224,20 @@ public class ConnectionHandler implements Runnable {
      *
      */
     public void disconnect() {
+        System.out.println("Disconnecting...");
         try {
-            this.running = false;
-            this.toClient.flush();
-            this.toClient.close();
-            this.fromClient.close();
-            this.socket.close();
+            running = false;
+            toClient.flush();
+            toClient.close();
+            fromClient.close();
+            socket.close();
+            /*if (user != null)
+                if (clients)
+                clients.remove(user.getUid());*/
         } catch (IOException e) {
             e.printStackTrace();
         }
+        System.out.println("Closed connection successfully.");
     }
 
     /**
