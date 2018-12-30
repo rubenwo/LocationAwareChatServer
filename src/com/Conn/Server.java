@@ -5,8 +5,8 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -46,8 +46,7 @@ public class Server {
      */
     private Server() {
         try {
-            FileInputStream serviceAccount = new FileInputStream(getClass().getResource("/locationawareapp-d4ad4-firebase-adminsdk-sjzdi-569d413b69.json").getFile());
-
+            InputStream serviceAccount = this.getClass().getResourceAsStream("/keys/locationawareapp-d4ad4-firebase-adminsdk-sjzdi-569d413b69.json");
             FirebaseOptions options = new FirebaseOptions.Builder()
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                     .setDatabaseUrl("https://locationawareapp-d4ad4.firebaseio.com")
