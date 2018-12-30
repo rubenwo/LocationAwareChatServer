@@ -7,11 +7,9 @@ import com.MessagingProtocol.MessageType;
 public class IdentificationMessage implements IMessage {
     private MessageType messageType = MessageType.Identification_Message;
     private String fireBaseToken;
-    private String name;
 
-    public IdentificationMessage(String fireBaseToken, String name) {
+    public IdentificationMessage(String fireBaseToken) {
         this.fireBaseToken = fireBaseToken;
-        this.name = name;
     }
 
     public static IdentificationMessage deserialize(String json) {
@@ -26,10 +24,6 @@ public class IdentificationMessage implements IMessage {
     @Override
     public String getFireBaseToken() {
         return fireBaseToken;
-    }
-
-    public String getName() {
-        return name;
     }
 
     @Override

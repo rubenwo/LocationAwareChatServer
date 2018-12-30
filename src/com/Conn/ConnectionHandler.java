@@ -79,7 +79,7 @@ public class ConnectionHandler implements Runnable {
                 clients.put(authenticatedUser.getUid(), ConnectionHandler.this);
                 user = authenticatedUser;
                 System.out.println(user.toString());
-                writeMessage(new IdentificationMessage("Server", "My name is"));
+                writeMessage(new IdentificationMessage("Server"));
             }
 
             @Override
