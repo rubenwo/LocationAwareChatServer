@@ -1,11 +1,16 @@
 package com.MessagingProtocol;
 
 public enum MessageType {
-    Identification_Message,
-    Image_Message,
-    ImageUploaded_Message,
-    Text_Message,
-    Audio_Message,
+    FriendRequest_Message,
+    FriendReply_Message,
+    FriendsRequest_Message,
+    FriendsReply_Message,
+    UploadAudioReply_Message,
+    UploadAudioRequest_Message,
+    UploadImageReply_Message,
+    UploadImageRequest_Message,
     LocationUpdate_Message,
-    SignOut_Message
+    Identification_Message,
+    SignOut_Message,
+    Text_Message
 }

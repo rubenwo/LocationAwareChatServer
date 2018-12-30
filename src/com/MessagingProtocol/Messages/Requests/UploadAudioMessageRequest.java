@@ -1,24 +1,28 @@
-package com.MessagingProtocol.Messages;
+package com.MessagingProtocol.Messages.Requests;
 
 import com.Constants;
 import com.Entities.User;
 import com.MessagingProtocol.IMessage;
 import com.MessagingProtocol.MessageType;
 
-public class AudioMessage implements IMessage {
-    private MessageType messageType = MessageType.Audio_Message;
+public class UploadAudioMessageRequest implements IMessage {
+    private MessageType messageType = MessageType.UploadAudioRequest_Message;
     private String fireBaseToken;
+    private String audioName;
+    private String audioExtension;
     private String base64EncodedAudio;
     private User target;
 
-    public AudioMessage(String fireBaseToken, String base64EncodedAudio, User target) {
+    public UploadAudioMessageRequest(String fireBaseToken, String audioName, String audioExtension, String base64EncodedAudio, User target) {
         this.fireBaseToken = fireBaseToken;
+        this.audioName = audioName;
+        this.audioExtension = audioExtension;
         this.base64EncodedAudio = base64EncodedAudio;
         this.target = target;
     }
 
-    public static AudioMessage deserialize(String json) {
-        return Constants.GSON.fromJson(json, AudioMessage.class);
+    public static UploadAudioMessageRequest fromJson(String json) {
+        return Constants.GSON.fromJson(json, UploadAudioMessageRequest.class);
     }
 
     @Override
@@ -29,6 +33,14 @@ public class AudioMessage implements IMessage {
     @Override
     public String getFireBaseToken() {
         return fireBaseToken;
+    }
+
+    public String getAudioName() {
+        return audioName;
+    }
+
+    public String getAudioExtension() {
+        return audioExtension;
     }
 
     public String getBase64EncodedAudio() {

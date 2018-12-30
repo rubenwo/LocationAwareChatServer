@@ -1,21 +1,29 @@
 package com.Conn;
 
 
-import com.Entities.Account;
-import com.Entities.Image;
-import com.Entities.Location;
-import com.Entities.User;
+import com.Entities.*;
 import com.Listeners.MessageCallback;
 import com.MessagingProtocol.IMessage;
-import com.MessagingProtocol.Messages.*;
+import com.MessagingProtocol.Messages.Replies.FriendReply;
+import com.MessagingProtocol.Messages.Replies.FriendsReply;
+import com.MessagingProtocol.Messages.Replies.UploadAudioMessageReply;
+import com.MessagingProtocol.Messages.Replies.UploadImageReply;
+import com.MessagingProtocol.Messages.Requests.FriendRequest;
+import com.MessagingProtocol.Messages.Requests.FriendsRequest;
+import com.MessagingProtocol.Messages.Requests.UploadAudioMessageRequest;
+import com.MessagingProtocol.Messages.Requests.UploadImageRequest;
+import com.MessagingProtocol.Messages.Updates.IdentificationMessage;
+import com.MessagingProtocol.Messages.Updates.LocationUpdateMessage;
+import com.MessagingProtocol.Messages.Updates.SignOutMessage;
+import com.MessagingProtocol.Messages.Updates.TextMessage;
 import com.Utils.MessageSerializer;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -83,17 +91,17 @@ public class ConnectionHandler implements Runnable {
             }
 
             @Override
-            public void onImageMessage(Image image, User target) {
+            public void onUploadImageRequest(Image image, User target) {
                 imageClient.addImageToUploadQueue(image.getName(), image.getExtension(), image.getData());
                 if (clients.containsKey(target.getUid()))
-                    clients.get(target.getUid()).writeMessage(new ImageUploadedMessage("SERVER", "http://206.189.3.15/images/" + image.getName() + image.getExtension()));
-                writeMessage(new ImageUploadedMessage("SERVER", "http://206.189.3.15/images/" + image.getName() + image.getExtension()));
+                    clients.get(target.getUid()).writeMessage(new UploadImageReply("SERVER", "http://206.189.3.15/images/" + image.getName() + image.getExtension()));
+                writeMessage(new UploadImageReply("SERVER", "http://206.189.3.15/images/" + image.getName() + image.getExtension()));
             }
 
             @Override
-            public void onAudioMessage(String base64EncodedAudio, User target) {
+            public void onUploadAudioRequest(Audio audio, User target) {
                 if (clients.containsKey(target.getUid()))
-                    clients.get(target.getUid()).writeMessage(new AudioMessage("SERVER", base64EncodedAudio, null));
+                    clients.get(target.getUid()).writeMessage(new UploadAudioMessageReply("", ""));
             }
 
             @Override
@@ -112,6 +120,41 @@ public class ConnectionHandler implements Runnable {
                 if (signOut)
                     disconnect();
             }
+
+            @Override
+            public void onAuthenticationFailed() {
+
+            }
+
+            @Override
+            public void onFriendRequest(String email) {
+
+            }
+
+            @Override
+            public void onFriendsRequest() {
+
+            }
+
+            @Override
+            public void onFriendReply(User friend, boolean approved) {
+
+            }
+
+            @Override
+            public void onFriendsReply(ArrayList<User> users) {
+
+            }
+
+            @Override
+            public void onUploadAudioReply(String url) {
+
+            }
+
+            @Override
+            public void onUploadImageReply(String url) {
+
+            }
         });
     }
 
@@ -127,8 +170,23 @@ public class ConnectionHandler implements Runnable {
                 return;
             }
             switch (message.getMessageType()) {
-                case Image_Message:
-                    messageHandler.handleImageMessage((ImageMessage) message);
+                case UploadImageRequest_Message:
+                    messageHandler.handleUploadImageRequestMessage((UploadImageRequest) message);
+                    break;
+                case UploadImageReply_Message:
+                    messageHandler.handleUploadImageReply((UploadImageReply) message);
+                    break;
+                case FriendsRequest_Message:
+                    messageHandler.handleFriendsRequest((FriendsRequest) message);
+                    break;
+                case FriendsReply_Message:
+                    messageHandler.handleFriendsReply((FriendsReply) message);
+                    break;
+                case UploadAudioRequest_Message:
+                    messageHandler.handleUploadAudioRequestMessage((UploadAudioMessageRequest) message);
+                    break;
+                case UploadAudioReply_Message:
+                    messageHandler.handleUploadAudioMessageReply((UploadAudioMessageReply) message);
                     break;
                 case Identification_Message:
                     messageHandler.handleIdentificationMessage((IdentificationMessage) message);
@@ -136,14 +194,17 @@ public class ConnectionHandler implements Runnable {
                 case Text_Message:
                     messageHandler.handleTextMessage((TextMessage) message);
                     break;
-                case Audio_Message:
-                    messageHandler.handleAudioMessage((AudioMessage) message);
-                    break;
                 case SignOut_Message:
                     messageHandler.handleSignOutMessage((SignOutMessage) message);
                     break;
                 case LocationUpdate_Message:
                     messageHandler.handleLocationUpdateMessage((LocationUpdateMessage) message);
+                    break;
+                case FriendRequest_Message:
+                    messageHandler.handleFriendRequest((FriendRequest) message);
+                    break;
+                case FriendReply_Message:
+                    messageHandler.handleFriendReply((FriendReply) message);
                     break;
             }
         }
@@ -211,13 +272,8 @@ public class ConnectionHandler implements Runnable {
         } catch (DataFormatException e) {
             e.printStackTrace();
         }*/
-        String ser = "";
-        try {
-            ser = new String(compressedData, 0, compressedData.length, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return MessageSerializer.deserialize(ser);
+
+        return MessageSerializer.deserialize(compressedData, false);
     }
 
     /**

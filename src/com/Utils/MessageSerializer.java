@@ -2,12 +2,28 @@ package com.Utils;
 
 import com.MessagingProtocol.IMessage;
 import com.MessagingProtocol.MessageType;
-import com.MessagingProtocol.Messages.*;
+import com.MessagingProtocol.Messages.Replies.FriendReply;
+import com.MessagingProtocol.Messages.Replies.FriendsReply;
+import com.MessagingProtocol.Messages.Replies.UploadAudioMessageReply;
+import com.MessagingProtocol.Messages.Replies.UploadImageReply;
+import com.MessagingProtocol.Messages.Requests.FriendRequest;
+import com.MessagingProtocol.Messages.Requests.FriendsRequest;
+import com.MessagingProtocol.Messages.Requests.UploadAudioMessageRequest;
+import com.MessagingProtocol.Messages.Requests.UploadImageRequest;
+import com.MessagingProtocol.Messages.Updates.IdentificationMessage;
+import com.MessagingProtocol.Messages.Updates.LocationUpdateMessage;
+import com.MessagingProtocol.Messages.Updates.SignOutMessage;
+import com.MessagingProtocol.Messages.Updates.TextMessage;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 public class MessageSerializer {
+    /**
+     * @param value
+     * @return
+     */
     private static byte[] toByteArray(int value) {
         return new byte[]{
                 (byte) (value >> 24),
@@ -43,10 +59,17 @@ public class MessageSerializer {
     }
 
     /**
-     * @param json
+     * @param data
+     * @param compressed
      * @return
      */
-    public static IMessage deserialize(String json) {
+    public static IMessage deserialize(byte[] data, boolean compressed) {
+        String json;
+        try {
+            json = new String(data, 0, data.length, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            return null;
+        }
         System.out.println("SERIALIZED:" + json);
         if (!json.isEmpty()) {
             JSONObject obj = new JSONObject(json);
@@ -55,18 +78,30 @@ public class MessageSerializer {
             System.out.println(messageType);
             MessageType type = MessageType.valueOf(messageType);
             switch (type) {
-                case LocationUpdate_Message:
-                    return LocationUpdateMessage.deserialize(json);
-                case SignOut_Message:
-                    return SignOutMessage.deserialize(json);
-                case Audio_Message:
-                    return AudioMessage.deserialize(json);
-                case Text_Message:
-                    return TextMessage.deserialize(json);
                 case Identification_Message:
-                    return IdentificationMessage.deserialize(json);
-                case Image_Message:
-                    return ImageMessage.deserialize(json);
+                    return IdentificationMessage.fromJson(json);
+                case Text_Message:
+                    return TextMessage.fromJson(json);
+                case SignOut_Message:
+                    return SignOutMessage.fromJson(json);
+                case LocationUpdate_Message:
+                    return LocationUpdateMessage.fromJson(json);
+                case FriendReply_Message:
+                    return FriendReply.fromJson(json);
+                case FriendRequest_Message:
+                    return FriendRequest.fromJson(json);
+                case UploadAudioReply_Message:
+                    return UploadAudioMessageReply.fromJson(json);
+                case UploadImageReply_Message:
+                    return UploadImageReply.fromJson(json);
+                case UploadAudioRequest_Message:
+                    return UploadAudioMessageRequest.fromJson(json);
+                case UploadImageRequest_Message:
+                    return UploadImageRequest.fromJson(json);
+                case FriendsReply_Message:
+                    return FriendsReply.fromJson(json);
+                case FriendsRequest_Message:
+                    return FriendsRequest.fromJson(json);
             }
         }
         return null;

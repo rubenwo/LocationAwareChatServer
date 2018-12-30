@@ -1,4 +1,4 @@
-package com.MessagingProtocol.Messages;
+package com.MessagingProtocol.Messages.Updates;
 
 import com.Constants;
 import com.MessagingProtocol.IMessage;
@@ -14,7 +14,7 @@ public class SignOutMessage implements IMessage {
         this.signOut = signOut;
     }
 
-    public static SignOutMessage deserialize(String json) {
+    public static SignOutMessage fromJson(String json) {
         return Constants.GSON.fromJson(json, SignOutMessage.class);
     }
 

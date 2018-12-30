@@ -1,4 +1,4 @@
-package com.MessagingProtocol.Messages;
+package com.MessagingProtocol.Messages.Updates;
 
 import com.Constants;
 import com.Entities.User;
@@ -17,7 +17,7 @@ public class TextMessage implements IMessage {
         this.target = target;
     }
 
-    public static TextMessage deserialize(String json) {
+    public static TextMessage fromJson(String json) {
         return Constants.GSON.fromJson(json, TextMessage.class);
     }
 

@@ -1,19 +1,19 @@
-package com.MessagingProtocol.Messages;
+package com.MessagingProtocol.Messages.Requests;
 
 import com.Constants;
 import com.MessagingProtocol.IMessage;
 import com.MessagingProtocol.MessageType;
 
-public class IdentificationMessage implements IMessage {
-    private MessageType messageType = MessageType.Identification_Message;
+public class FriendsRequest implements IMessage {
+    private MessageType messageType = MessageType.FriendsRequest_Message;
     private String fireBaseToken;
 
-    public IdentificationMessage(String fireBaseToken) {
+    public FriendsRequest(String fireBaseToken) {
         this.fireBaseToken = fireBaseToken;
     }
 
-    public static IdentificationMessage deserialize(String json) {
-        return Constants.GSON.fromJson(json, IdentificationMessage.class);
+    public static FriendsRequest fromJson(String json) {
+        return Constants.GSON.fromJson(json, FriendsRequest.class);
     }
 
     @Override

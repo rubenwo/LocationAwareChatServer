@@ -1,4 +1,4 @@
-package com.MessagingProtocol.Messages;
+package com.MessagingProtocol.Messages.Updates;
 
 import com.Constants;
 import com.Entities.Location;
@@ -15,7 +15,7 @@ public class LocationUpdateMessage implements IMessage {
         this.location = location;
     }
 
-    public static LocationUpdateMessage deserialize(String json) {
+    public static LocationUpdateMessage fromJson(String json) {
         return Constants.GSON.fromJson(json, LocationUpdateMessage.class);
     }
 

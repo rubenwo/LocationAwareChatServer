@@ -1,10 +1,22 @@
 package com.Conn;
 
 
+import com.Entities.Audio;
 import com.Entities.Image;
 import com.Entities.User;
 import com.Listeners.MessageCallback;
-import com.MessagingProtocol.Messages.*;
+import com.MessagingProtocol.Messages.Replies.FriendReply;
+import com.MessagingProtocol.Messages.Replies.FriendsReply;
+import com.MessagingProtocol.Messages.Replies.UploadAudioMessageReply;
+import com.MessagingProtocol.Messages.Replies.UploadImageReply;
+import com.MessagingProtocol.Messages.Requests.FriendRequest;
+import com.MessagingProtocol.Messages.Requests.FriendsRequest;
+import com.MessagingProtocol.Messages.Requests.UploadAudioMessageRequest;
+import com.MessagingProtocol.Messages.Requests.UploadImageRequest;
+import com.MessagingProtocol.Messages.Updates.IdentificationMessage;
+import com.MessagingProtocol.Messages.Updates.LocationUpdateMessage;
+import com.MessagingProtocol.Messages.Updates.SignOutMessage;
+import com.MessagingProtocol.Messages.Updates.TextMessage;
 import com.Services.UserAuthenticationService;
 
 import java.util.Base64;
@@ -20,39 +32,126 @@ public class MessageHandler {
     public void handleIdentificationMessage(IdentificationMessage message) {
         CompletableFuture.runAsync(() -> {
             User authenticatedUser = UserAuthenticationService.authenticate(message.getFireBaseToken());
-            callback.onIdentificationMessage(authenticatedUser);
+            if (authenticatedUser == null)
+                callback.onAuthenticationFailed();
+            else
+                callback.onIdentificationMessage(authenticatedUser);
         });
 
     }
 
-    public void handleImageMessage(ImageMessage message) {
+    public void handleUploadImageRequestMessage(UploadImageRequest message) {
         CompletableFuture.runAsync(() -> {
-            byte[] imageData = Base64.getDecoder().decode(message.getBase64EncodedImage());
-            callback.onImageMessage(new Image(message.getImageName(), message.getImageExtension(), imageData), message.getTarget());
+            User authenticatedUser = UserAuthenticationService.authenticate(message.getFireBaseToken());
+            if (authenticatedUser == null)
+                callback.onAuthenticationFailed();
+            else {
+                byte[] imageData = Base64.getDecoder().decode(message.getBase64EncodedImage());
+                callback.onUploadImageRequest(new Image(message.getImageName(), message.getImageExtension(), imageData), message.getTarget());
+            }
         });
     }
 
     public void handleLocationUpdateMessage(LocationUpdateMessage message) {
         CompletableFuture.runAsync(() -> {
-            callback.onLocationUpdateMessage(message.getLocation());
+            User authenticatedUser = UserAuthenticationService.authenticate(message.getFireBaseToken());
+            if (authenticatedUser == null)
+                callback.onAuthenticationFailed();
+            else
+                callback.onLocationUpdateMessage(message.getLocation());
         });
     }
 
     public void handleTextMessage(TextMessage message) {
         CompletableFuture.runAsync(() -> {
-            callback.onTextMessage(message.getTextMessage(), message.getTarget());
+            User authenticatedUser = UserAuthenticationService.authenticate(message.getFireBaseToken());
+            if (authenticatedUser == null)
+                callback.onAuthenticationFailed();
+            else
+                callback.onTextMessage(message.getTextMessage(), message.getTarget());
         });
     }
 
     public void handleSignOutMessage(SignOutMessage message) {
         CompletableFuture.runAsync(() -> {
-            callback.onSignOutMessage(message.isSignOut());
+            User authenticatedUser = UserAuthenticationService.authenticate(message.getFireBaseToken());
+            if (authenticatedUser == null)
+                callback.onAuthenticationFailed();
+            else
+                callback.onSignOutMessage(message.isSignOut());
         });
     }
 
-    public void handleAudioMessage(AudioMessage message) {
+    public void handleUploadAudioRequestMessage(UploadAudioMessageRequest message) {
         CompletableFuture.runAsync(() -> {
-            callback.onAudioMessage(message.getBase64EncodedAudio(), message.getTarget());
+            User authenticatedUser = UserAuthenticationService.authenticate(message.getFireBaseToken());
+            if (authenticatedUser == null)
+                callback.onAuthenticationFailed();
+            else {
+                byte[] audioData = Base64.getDecoder().decode(message.getBase64EncodedAudio());
+                callback.onUploadAudioRequest(new Audio(message.getAudioName(), message.getAudioExtension(), audioData), message.getTarget());
+            }
         });
     }
+
+    public void handleFriendRequest(FriendRequest message) {
+        CompletableFuture.runAsync(() -> {
+            User authenticatedUser = UserAuthenticationService.authenticate(message.getFireBaseToken());
+            if (authenticatedUser == null)
+                callback.onAuthenticationFailed();
+            else
+                callback.onFriendRequest(message.getFriendEmail());
+        });
+    }
+
+    public void handleFriendsRequest(FriendsRequest message) {
+        CompletableFuture.runAsync(() -> {
+            User authenticatedUser = UserAuthenticationService.authenticate(message.getFireBaseToken());
+            if (authenticatedUser == null)
+                callback.onAuthenticationFailed();
+            else
+                callback.onFriendsRequest();
+        });
+    }
+
+    public void handleFriendReply(FriendReply message) {
+        CompletableFuture.runAsync(() -> {
+            User authenticatedUser = UserAuthenticationService.authenticate(message.getFireBaseToken());
+            if (authenticatedUser == null)
+                callback.onAuthenticationFailed();
+            else
+                callback.onFriendReply(message.getFriend(), message.isApproved());
+        });
+    }
+
+    public void handleFriendsReply(FriendsReply message) {
+        CompletableFuture.runAsync(() -> {
+            User authenticatedUser = UserAuthenticationService.authenticate(message.getFireBaseToken());
+            if (authenticatedUser == null)
+                callback.onAuthenticationFailed();
+            else
+                callback.onFriendsReply(message.getFriends());
+        });
+    }
+
+    public void handleUploadAudioMessageReply(UploadAudioMessageReply message) {
+        CompletableFuture.runAsync(() -> {
+            User authenticatedUser = UserAuthenticationService.authenticate(message.getFireBaseToken());
+            if (authenticatedUser == null)
+                callback.onAuthenticationFailed();
+            else
+                callback.onUploadAudioReply(message.getAudioFileUrl());
+        });
+    }
+
+    public void handleUploadImageReply(UploadImageReply message) {
+        CompletableFuture.runAsync(() -> {
+            User authenticatedUser = UserAuthenticationService.authenticate(message.getFireBaseToken());
+            if (authenticatedUser == null)
+                callback.onAuthenticationFailed();
+            else
+                callback.onUploadImageReply(message.getImageUrl());
+        });
+    }
+
 }

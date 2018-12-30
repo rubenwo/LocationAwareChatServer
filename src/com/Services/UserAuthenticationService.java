@@ -7,7 +7,10 @@ import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseToken;
 
 public class UserAuthenticationService {
-
+    /**
+     * @param fireBaseToken
+     * @return
+     */
     public static User authenticate(String fireBaseToken) {
         try {
             FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(fireBaseToken);
