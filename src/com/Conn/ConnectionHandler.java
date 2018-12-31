@@ -1,6 +1,7 @@
 package com.Conn;
 
 
+import com.Constants;
 import com.Entities.*;
 import com.Listeners.MessageCallback;
 import com.MessagingProtocol.IMessage;
@@ -12,10 +13,7 @@ import com.MessagingProtocol.Messages.Requests.FriendRequest;
 import com.MessagingProtocol.Messages.Requests.FriendsRequest;
 import com.MessagingProtocol.Messages.Requests.UploadAudioMessageRequest;
 import com.MessagingProtocol.Messages.Requests.UploadImageRequest;
-import com.MessagingProtocol.Messages.Updates.IdentificationMessage;
-import com.MessagingProtocol.Messages.Updates.LocationUpdateMessage;
-import com.MessagingProtocol.Messages.Updates.SignOutMessage;
-import com.MessagingProtocol.Messages.Updates.TextMessage;
+import com.MessagingProtocol.Messages.Updates.*;
 import com.Utils.MessageSerializer;
 
 import java.io.DataInputStream;
@@ -86,6 +84,7 @@ public class ConnectionHandler implements Runnable {
             public void onIdentificationMessage(User authenticatedUser) {
                 clients.put(authenticatedUser.getUid(), ConnectionHandler.this);
                 user = authenticatedUser;
+                account = new Account(user);
                 System.out.println(user.toString());
                 writeMessage(new IdentificationMessage("Server"));
             }
@@ -94,8 +93,8 @@ public class ConnectionHandler implements Runnable {
             public void onUploadImageRequest(Image image, User target) {
                 imageClient.addImageToUploadQueue(image.getName(), image.getExtension(), image.getData());
                 if (clients.containsKey(target.getUid()))
-                    clients.get(target.getUid()).writeMessage(new UploadImageReply("SERVER", "http://206.189.3.15/images/" + image.getName() + image.getExtension()));
-                writeMessage(new UploadImageReply("SERVER", "http://206.189.3.15/images/" + image.getName() + image.getExtension()));
+                    clients.get(target.getUid()).writeMessage(new UploadImageReply("SERVER", Constants.IMAGE_SERVER_LINK + image.getName() + image.getExtension()));
+                writeMessage(new UploadImageReply("SERVER", Constants.IMAGE_SERVER_LINK + image.getName() + image.getExtension()));
             }
 
             @Override
@@ -106,13 +105,15 @@ public class ConnectionHandler implements Runnable {
 
             @Override
             public void onLocationUpdateMessage(Location location) {
+                if (account != null)
+                    account.getFriends().forEach(friend -> clients.get(friend.getUid()).writeMessage(new LocationUpdateMessage("SERVER", location)));
                 user.setLocation(location);
             }
 
             @Override
             public void onTextMessage(String textMessage, User target) {
                 if (clients.containsKey(target.getUid()))
-                    clients.get(target.getUid()).writeMessage(new TextMessage("SERVER", textMessage, null));
+                    clients.get(target.getUid()).writeMessage(new TextMessage("SERVER", textMessage, target));
             }
 
             @Override
@@ -123,37 +124,51 @@ public class ConnectionHandler implements Runnable {
 
             @Override
             public void onAuthenticationFailed() {
-
+                writeMessage(new AuthenticationFailedMessage());
             }
 
             @Override
             public void onFriendRequest(String email) {
+                ConnectionHandler targetHandler = null;
+                for (ConnectionHandler handler : clients.values()) {
+                    if (handler.user.getEmail().equals(email)) {
+                        targetHandler = handler;
+                        break;
+                    }
+                }
+                if (targetHandler != null)
+                    targetHandler.writeMessage(new FriendRequest("SERVER", user.getEmail()));
 
             }
 
             @Override
             public void onFriendsRequest() {
-
+                if (account != null)
+                    writeMessage(new FriendsReply("SERVER", account.getFriends()));
             }
 
             @Override
             public void onFriendReply(User friend, boolean approved) {
-
+                if (!approved) {
+                    writeMessage(new FriendReply("SERVER", null, false));
+                } else {
+                    writeMessage(new FriendReply("SERVER", friend, true));
+                }
             }
 
             @Override
             public void onFriendsReply(ArrayList<User> users) {
-
+                // Server should never get this message
             }
 
             @Override
             public void onUploadAudioReply(String url) {
-
+                // Server should never get this message
             }
 
             @Override
             public void onUploadImageReply(String url) {
-
+                // Server should never get this message
             }
         });
     }
