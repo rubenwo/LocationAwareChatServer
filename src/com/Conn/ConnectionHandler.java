@@ -90,7 +90,7 @@ public class ConnectionHandler implements Runnable {
                 user = authenticatedUser;
                 account = new Account(user);
                 System.out.println(user.toString());
-                writeMessage(new IdentificationMessage("Server"));
+                writeMessage(new AuthenticationSuccesfulMessage("SERVER", user));
             }
 
             /**
@@ -102,8 +102,8 @@ public class ConnectionHandler implements Runnable {
             public void onUploadImageRequest(Image image, User target) {
                 imageClient.addImageToUploadQueue(image.getName(), image.getExtension(), image.getData());
                 if (clients.containsKey(target.getUid()))
-                    clients.get(target.getUid()).writeMessage(new UploadImageReply("SERVER", Constants.IMAGE_SERVER_LINK + image.getName() + image.getExtension()));
-                writeMessage(new UploadImageReply("SERVER", Constants.IMAGE_SERVER_LINK + image.getName() + image.getExtension()));
+                    clients.get(target.getUid()).writeMessage(new UploadImageReply("SERVER", Constants.IMAGE_SERVER_LINK + image.getName() + image.getExtension(), user));
+                writeMessage(new UploadImageReply("SERVER", Constants.IMAGE_SERVER_LINK + image.getName() + image.getExtension(), user));
             }
 
             /**
@@ -115,8 +115,8 @@ public class ConnectionHandler implements Runnable {
             public void onUploadAudioRequest(Audio audio, User target) {
                 // TODO: Upload audio to a REST server. Also create this server :D
                 if (clients.containsKey(target.getUid()))
-                    clients.get(target.getUid()).writeMessage(new UploadAudioMessageReply("SERVER", Constants.AUDIO_SERVER_LINK + audio.getName() + audio.getExtension()));
-                writeMessage(new UploadAudioMessageReply("SERVER", Constants.AUDIO_SERVER_LINK + audio.getName() + audio.getExtension()));
+                    clients.get(target.getUid()).writeMessage(new UploadAudioMessageReply("SERVER", user, Constants.AUDIO_SERVER_LINK + audio.getName() + audio.getExtension()));
+                writeMessage(new UploadAudioMessageReply("SERVER", user, Constants.AUDIO_SERVER_LINK + audio.getName() + audio.getExtension()));
             }
 
             /**
@@ -126,7 +126,7 @@ public class ConnectionHandler implements Runnable {
             @Override
             public void onLocationUpdateMessage(Location location) {
                 if (account != null)
-                    account.getFriends().forEach(friend -> clients.get(friend.getUid()).writeMessage(new LocationUpdateMessage("SERVER", location)));
+                    account.getFriends().forEach(friend -> clients.get(friend.getUid()).writeMessage(new LocationUpdateMessage("SERVER", location, user)));
                 user.setLocation(location);
             }
 
@@ -138,7 +138,7 @@ public class ConnectionHandler implements Runnable {
             @Override
             public void onTextMessage(String textMessage, User target) {
                 if (clients.containsKey(target.getUid()))
-                    clients.get(target.getUid()).writeMessage(new TextMessage("SERVER", textMessage, target));
+                    clients.get(target.getUid()).writeMessage(new TextMessage("SERVER", textMessage, target, user));
             }
 
             /**
@@ -173,9 +173,9 @@ public class ConnectionHandler implements Runnable {
                     }
                 }
                 if (targetHandler != null)
-                    targetHandler.writeMessage(new FriendRequest("SERVER", user.getEmail()));
+                    targetHandler.writeMessage(new FriendRequest("SERVER", user.getEmail(), user));
                 else
-                    writeMessage(new FriendReply("SERVER", null, false));
+                    writeMessage(new FriendReply("SERVER", user, null, false));
             }
 
             /**
@@ -184,9 +184,9 @@ public class ConnectionHandler implements Runnable {
             @Override
             public void onFriendsRequest() {
                 if (account != null)
-                    writeMessage(new FriendsReply("SERVER", account.getFriends()));
+                    writeMessage(new FriendsReply("SERVER", user, account.getFriends()));
                 else
-                    writeMessage(new FriendsReply("SERVER", null));
+                    writeMessage(new FriendsReply("SERVER", user, null));
             }
 
             /**
@@ -197,9 +197,9 @@ public class ConnectionHandler implements Runnable {
             @Override
             public void onFriendReply(User friend, boolean approved) {
                 if (!approved) {
-                    writeMessage(new FriendReply("SERVER", null, false));
+                    writeMessage(new FriendReply("SERVER", user, null, false));
                 } else {
-                    writeMessage(new FriendReply("SERVER", friend, true));
+                    writeMessage(new FriendReply("SERVER", user, friend, true));
                 }
             }
 

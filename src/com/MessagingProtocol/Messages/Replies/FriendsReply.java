@@ -1,5 +1,6 @@
 package com.MessagingProtocol.Messages.Replies;
 
+
 import com.Constants;
 import com.Entities.User;
 import com.MessagingProtocol.IMessage;
@@ -10,10 +11,12 @@ import java.util.ArrayList;
 public class FriendsReply implements IMessage {
     private MessageType messageType = MessageType.FriendsReply_Message;
     private String fireBaseToken;
+    private User sender;
     private ArrayList<User> friends;
 
-    public FriendsReply(String fireBaseToken, ArrayList<User> friends) {
+    public FriendsReply(String fireBaseToken, User sender, ArrayList<User> friends) {
         this.fireBaseToken = fireBaseToken;
+        this.sender = sender;
         this.friends = friends;
     }
 
@@ -29,6 +32,11 @@ public class FriendsReply implements IMessage {
     @Override
     public String getFireBaseToken() {
         return fireBaseToken;
+    }
+
+    @Override
+    public User getSender() {
+        return sender;
     }
 
     public ArrayList<User> getFriends() {

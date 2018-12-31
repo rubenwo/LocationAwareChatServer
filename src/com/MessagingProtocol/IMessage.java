@@ -1,18 +1,14 @@
 package com.MessagingProtocol;
 
+
+import com.Entities.User;
+
 public interface IMessage {
-    /**
-     * @return
-     */
     MessageType getMessageType();
 
-    /**
-     * @return
-     */
     String getFireBaseToken();
 
-    /**
-     * @return
-     */
+    User getSender();
+
     String toJson();
 }

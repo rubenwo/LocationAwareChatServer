@@ -1,5 +1,6 @@
 package com.MessagingProtocol.Messages.Requests;
 
+
 import com.Constants;
 import com.Entities.User;
 import com.MessagingProtocol.IMessage;
@@ -12,17 +13,24 @@ public class UploadImageRequest implements IMessage {
     private String imageExtension;
     private String base64EncodedImage;
     private User target;
+    private User sender;
 
-    public UploadImageRequest(String fireBaseToken, String imageName, String imageExtension, String base64EncodedImage, User target) {
+    public UploadImageRequest(String fireBaseToken, String imageName, String imageExtension, String base64EncodedImage, User target, User sender) {
         this.fireBaseToken = fireBaseToken;
         this.imageName = imageName;
         this.imageExtension = imageExtension;
         this.base64EncodedImage = base64EncodedImage;
         this.target = target;
+        this.sender = sender;
     }
 
     public static UploadImageRequest fromJson(String json) {
         return Constants.GSON.fromJson(json, UploadImageRequest.class);
+    }
+
+    @Override
+    public User getSender() {
+        return sender;
     }
 
     @Override

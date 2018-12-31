@@ -1,5 +1,6 @@
 package com.MessagingProtocol.Messages.Requests;
 
+
 import com.Constants;
 import com.Entities.User;
 import com.MessagingProtocol.IMessage;
@@ -12,17 +13,24 @@ public class UploadAudioMessageRequest implements IMessage {
     private String audioExtension;
     private String base64EncodedAudio;
     private User target;
+    private User sender;
 
-    public UploadAudioMessageRequest(String fireBaseToken, String audioName, String audioExtension, String base64EncodedAudio, User target) {
+    public UploadAudioMessageRequest(String fireBaseToken, String audioName, String audioExtension, String base64EncodedAudio, User target, User sender) {
         this.fireBaseToken = fireBaseToken;
         this.audioName = audioName;
         this.audioExtension = audioExtension;
         this.base64EncodedAudio = base64EncodedAudio;
         this.target = target;
+        this.sender = sender;
     }
 
     public static UploadAudioMessageRequest fromJson(String json) {
         return Constants.GSON.fromJson(json, UploadAudioMessageRequest.class);
+    }
+
+    @Override
+    public User getSender() {
+        return sender;
     }
 
     @Override
