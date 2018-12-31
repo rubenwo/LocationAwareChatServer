@@ -1,5 +1,8 @@
 package com.MessagingProtocol;
 
+/**
+ *
+ */
 public enum MessageType {
     FriendRequest_Message,
     FriendReply_Message,

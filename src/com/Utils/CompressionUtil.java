@@ -9,6 +9,11 @@ import java.util.zip.Inflater;
 
 //TODO: Implement compression success/failed flag to byte[]
 public class CompressionUtil {
+    /**
+     * @param data
+     * @return
+     * @throws IOException
+     */
     public static byte[] compress(byte[] data) throws IOException {
         Deflater deflater = new Deflater(Deflater.BEST_COMPRESSION);
         deflater.setInput(data);
@@ -26,7 +31,13 @@ public class CompressionUtil {
         return data;
     }
 
-    public static String decompress(byte[] data) throws IOException, DataFormatException {
+    /**
+     * @param data
+     * @return
+     * @throws IOException
+     * @throws DataFormatException
+     */
+    public static byte[] decompress(byte[] data) throws IOException, DataFormatException {
         String encodedString = java.util.Base64.getEncoder().encodeToString(data);
         byte[] output = Base64.getDecoder().decode(encodedString);
 
@@ -39,7 +50,8 @@ public class CompressionUtil {
 
         System.out.println("Compressed: " + data.length + " bytes");
         System.out.println("Decompressed: " + resultLength + " bytes");
-        return new String(result, 0, resultLength, "UTF-8");
+        return result;
+        //    return new String(result, 0, resultLength, "UTF-8");
     }
 
 }

@@ -33,6 +33,16 @@ public class Constants {
      *
      */
     public static final Gson GSON = new Gson();
+    /**
+     *
+     */
     public static final String IMAGE_SERVER_LINK = "http://206.189.3.15/images/";
+    /**
+     *
+     */
+    public static final String AUDIO_SERVER_LINK = "http://";
+    /**
+     *
+     */
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 }

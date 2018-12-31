@@ -80,6 +80,10 @@ public class ConnectionHandler implements Runnable {
             e.printStackTrace();
         }
         this.messageHandler = new MessageHandler(new MessageCallback() {
+            /**
+             *
+             * @param authenticatedUser
+             */
             @Override
             public void onIdentificationMessage(User authenticatedUser) {
                 clients.put(authenticatedUser.getUid(), ConnectionHandler.this);
@@ -89,6 +93,11 @@ public class ConnectionHandler implements Runnable {
                 writeMessage(new IdentificationMessage("Server"));
             }
 
+            /**
+             *
+             * @param image
+             * @param target
+             */
             @Override
             public void onUploadImageRequest(Image image, User target) {
                 imageClient.addImageToUploadQueue(image.getName(), image.getExtension(), image.getData());
@@ -97,12 +106,23 @@ public class ConnectionHandler implements Runnable {
                 writeMessage(new UploadImageReply("SERVER", Constants.IMAGE_SERVER_LINK + image.getName() + image.getExtension()));
             }
 
+            /**
+             *
+             * @param audio
+             * @param target
+             */
             @Override
             public void onUploadAudioRequest(Audio audio, User target) {
+                // TODO: Upload audio to a REST server. Also create this server :D
                 if (clients.containsKey(target.getUid()))
-                    clients.get(target.getUid()).writeMessage(new UploadAudioMessageReply("", ""));
+                    clients.get(target.getUid()).writeMessage(new UploadAudioMessageReply("SERVER", Constants.AUDIO_SERVER_LINK + audio.getName() + audio.getExtension()));
+                writeMessage(new UploadAudioMessageReply("SERVER", Constants.AUDIO_SERVER_LINK + audio.getName() + audio.getExtension()));
             }
 
+            /**
+             *
+             * @param location
+             */
             @Override
             public void onLocationUpdateMessage(Location location) {
                 if (account != null)
@@ -110,23 +130,39 @@ public class ConnectionHandler implements Runnable {
                 user.setLocation(location);
             }
 
+            /**
+             *
+             * @param textMessage
+             * @param target
+             */
             @Override
             public void onTextMessage(String textMessage, User target) {
                 if (clients.containsKey(target.getUid()))
                     clients.get(target.getUid()).writeMessage(new TextMessage("SERVER", textMessage, target));
             }
 
+            /**
+             *
+             * @param signOut
+             */
             @Override
             public void onSignOutMessage(boolean signOut) {
                 if (signOut)
                     disconnect();
             }
 
+            /**
+             *
+             */
             @Override
             public void onAuthenticationFailed() {
                 writeMessage(new AuthenticationFailedMessage());
             }
 
+            /**
+             *
+             * @param email
+             */
             @Override
             public void onFriendRequest(String email) {
                 ConnectionHandler targetHandler = null;
@@ -138,15 +174,26 @@ public class ConnectionHandler implements Runnable {
                 }
                 if (targetHandler != null)
                     targetHandler.writeMessage(new FriendRequest("SERVER", user.getEmail()));
-
+                else
+                    writeMessage(new FriendReply("SERVER", null, false));
             }
 
+            /**
+             *
+             */
             @Override
             public void onFriendsRequest() {
                 if (account != null)
                     writeMessage(new FriendsReply("SERVER", account.getFriends()));
+                else
+                    writeMessage(new FriendsReply("SERVER", null));
             }
 
+            /**
+             *
+             * @param friend
+             * @param approved
+             */
             @Override
             public void onFriendReply(User friend, boolean approved) {
                 if (!approved) {
@@ -156,16 +203,28 @@ public class ConnectionHandler implements Runnable {
                 }
             }
 
+            /**
+             *
+             * @param users
+             */
             @Override
             public void onFriendsReply(ArrayList<User> users) {
                 // Server should never get this message
             }
 
+            /**
+             *
+             * @param url
+             */
             @Override
             public void onUploadAudioReply(String url) {
                 // Server should never get this message
             }
 
+            /**
+             *
+             * @param url
+             */
             @Override
             public void onUploadImageReply(String url) {
                 // Server should never get this message
@@ -302,9 +361,8 @@ public class ConnectionHandler implements Runnable {
             toClient.close();
             fromClient.close();
             socket.close();
-            /*if (user != null)
-                if (clients)
-                clients.remove(user.getUid());*/
+            if (user != null)
+                clients.remove(user.getUid());
         } catch (IOException e) {
             e.printStackTrace();
         }

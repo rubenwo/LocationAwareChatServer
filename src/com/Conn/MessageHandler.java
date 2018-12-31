@@ -23,12 +23,21 @@ import java.util.Base64;
 import java.util.concurrent.CompletableFuture;
 
 public class MessageHandler {
+    /**
+     *
+     */
     private MessageCallback callback;
 
+    /**
+     * @param callback
+     */
     public MessageHandler(MessageCallback callback) {
         this.callback = callback;
     }
 
+    /**
+     * @param message
+     */
     public void handleIdentificationMessage(IdentificationMessage message) {
         CompletableFuture.runAsync(() -> {
             User authenticatedUser = UserAuthenticationService.authenticate(message.getFireBaseToken());
@@ -40,6 +49,9 @@ public class MessageHandler {
 
     }
 
+    /**
+     * @param message
+     */
     public void handleUploadImageRequestMessage(UploadImageRequest message) {
         CompletableFuture.runAsync(() -> {
             User authenticatedUser = UserAuthenticationService.authenticate(message.getFireBaseToken());
@@ -52,6 +64,9 @@ public class MessageHandler {
         });
     }
 
+    /**
+     * @param message
+     */
     public void handleLocationUpdateMessage(LocationUpdateMessage message) {
         CompletableFuture.runAsync(() -> {
             User authenticatedUser = UserAuthenticationService.authenticate(message.getFireBaseToken());
@@ -62,6 +77,9 @@ public class MessageHandler {
         });
     }
 
+    /**
+     * @param message
+     */
     public void handleTextMessage(TextMessage message) {
         CompletableFuture.runAsync(() -> {
             User authenticatedUser = UserAuthenticationService.authenticate(message.getFireBaseToken());
@@ -72,6 +90,9 @@ public class MessageHandler {
         });
     }
 
+    /**
+     * @param message
+     */
     public void handleSignOutMessage(SignOutMessage message) {
         CompletableFuture.runAsync(() -> {
             User authenticatedUser = UserAuthenticationService.authenticate(message.getFireBaseToken());
@@ -82,6 +103,9 @@ public class MessageHandler {
         });
     }
 
+    /**
+     * @param message
+     */
     public void handleUploadAudioRequestMessage(UploadAudioMessageRequest message) {
         CompletableFuture.runAsync(() -> {
             User authenticatedUser = UserAuthenticationService.authenticate(message.getFireBaseToken());
@@ -94,6 +118,9 @@ public class MessageHandler {
         });
     }
 
+    /**
+     * @param message
+     */
     public void handleFriendRequest(FriendRequest message) {
         CompletableFuture.runAsync(() -> {
             User authenticatedUser = UserAuthenticationService.authenticate(message.getFireBaseToken());
@@ -104,6 +131,9 @@ public class MessageHandler {
         });
     }
 
+    /**
+     * @param message
+     */
     public void handleFriendsRequest(FriendsRequest message) {
         CompletableFuture.runAsync(() -> {
             User authenticatedUser = UserAuthenticationService.authenticate(message.getFireBaseToken());
@@ -114,6 +144,9 @@ public class MessageHandler {
         });
     }
 
+    /**
+     * @param message
+     */
     public void handleFriendReply(FriendReply message) {
         CompletableFuture.runAsync(() -> {
             User authenticatedUser = UserAuthenticationService.authenticate(message.getFireBaseToken());
@@ -124,6 +157,9 @@ public class MessageHandler {
         });
     }
 
+    /**
+     * @param message
+     */
     public void handleFriendsReply(FriendsReply message) {
         CompletableFuture.runAsync(() -> {
             User authenticatedUser = UserAuthenticationService.authenticate(message.getFireBaseToken());
@@ -134,6 +170,9 @@ public class MessageHandler {
         });
     }
 
+    /**
+     * @param message
+     */
     public void handleUploadAudioMessageReply(UploadAudioMessageReply message) {
         CompletableFuture.runAsync(() -> {
             User authenticatedUser = UserAuthenticationService.authenticate(message.getFireBaseToken());
@@ -144,6 +183,9 @@ public class MessageHandler {
         });
     }
 
+    /**
+     * @param message
+     */
     public void handleUploadImageReply(UploadImageReply message) {
         CompletableFuture.runAsync(() -> {
             User authenticatedUser = UserAuthenticationService.authenticate(message.getFireBaseToken());

@@ -10,14 +10,12 @@ import com.MessagingProtocol.Messages.Requests.FriendRequest;
 import com.MessagingProtocol.Messages.Requests.FriendsRequest;
 import com.MessagingProtocol.Messages.Requests.UploadAudioMessageRequest;
 import com.MessagingProtocol.Messages.Requests.UploadImageRequest;
-import com.MessagingProtocol.Messages.Updates.IdentificationMessage;
-import com.MessagingProtocol.Messages.Updates.LocationUpdateMessage;
-import com.MessagingProtocol.Messages.Updates.SignOutMessage;
-import com.MessagingProtocol.Messages.Updates.TextMessage;
+import com.MessagingProtocol.Messages.Updates.*;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.zip.DataFormatException;
 
 public class MessageSerializer {
     /**
@@ -65,10 +63,24 @@ public class MessageSerializer {
      */
     public static IMessage deserialize(byte[] data, boolean compressed) {
         String json;
-        try {
-            json = new String(data, 0, data.length, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            return null;
+        if (compressed) {
+            try {
+                byte[] decompressedData = CompressionUtil.decompress(data);
+                json = new String(decompressedData, 0, decompressedData.length, "UTF-8");
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            } catch (DataFormatException e) {
+                e.printStackTrace();
+                return null;
+            }
+        } else {
+            try {
+                json = new String(data, 0, data.length, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+                return null;
+            }
         }
         System.out.println("SERIALIZED:" + json);
         if (!json.isEmpty()) {
@@ -102,6 +114,8 @@ public class MessageSerializer {
                     return FriendsReply.fromJson(json);
                 case FriendsRequest_Message:
                     return FriendsRequest.fromJson(json);
+                case AuthenticationFailed_Message:
+                    return AuthenticationFailedMessage.fromJson(json);
             }
         }
         return null;
