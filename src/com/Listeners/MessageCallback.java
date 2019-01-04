@@ -1,9 +1,6 @@
 package com.Listeners;
 
-import com.Entities.Audio;
-import com.Entities.Image;
-import com.Entities.Location;
-import com.Entities.User;
+import com.Entities.*;
 
 import java.util.ArrayList;
 
@@ -35,5 +32,5 @@ public interface MessageCallback {
 
     void onUploadImageReply(String url);
 
-    void onEventCreationRequest();
+    void onEventCreationRequest(Event event);
 }

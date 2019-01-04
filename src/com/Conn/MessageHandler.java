@@ -2,6 +2,7 @@ package com.Conn;
 
 
 import com.Entities.Audio;
+import com.Entities.Event;
 import com.Entities.Image;
 import com.Entities.User;
 import com.Listeners.MessageCallback;
@@ -16,7 +17,9 @@ import com.MessagingProtocol.Messages.Updates.SignOutMessage;
 import com.MessagingProtocol.Messages.Updates.TextMessage;
 import com.Services.UserAuthenticationService;
 
+import java.time.LocalDate;
 import java.util.Base64;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class MessageHandler {
@@ -201,8 +204,13 @@ public class MessageHandler {
             User authenticatedUser = UserAuthenticationService.authenticate(message.getFireBaseToken());
             if (authenticatedUser == null)
                 callback.onAuthenticationFailed();
-            else
-                callback.onEventCreationRequest();
+            else {
+                String uid = UUID.randomUUID().toString();
+                LocalDate eventCreationDate = LocalDate.now();
+                LocalDate eventExpiration = eventCreationDate.plusDays(1);
+                Event event = new Event(message.getLocation(), message.getEventName(), uid, eventExpiration.toString(), message.getSender());
+                callback.onEventCreationRequest(event);
+            }
         });
     }
 

@@ -1,6 +1,7 @@
 package com.Conn;
 
 import com.Constants;
+import com.Entities.Event;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
@@ -28,6 +29,10 @@ public class Server {
      * Concurrent HashMap. Key is the uid of an authenticated user. Value is the connected connection handler.
      */
     private ConcurrentHashMap<String, ConnectionHandler> clients;
+    /**
+     *
+     */
+    private ConcurrentHashMap<String, Event> events;
     /**
      *
      */
@@ -92,7 +97,7 @@ public class Server {
                     e.printStackTrace();
                 }
                 if (socket != null) {
-                    ConnectionHandler client = new ConnectionHandler(socket, clients);
+                    ConnectionHandler client = new ConnectionHandler(socket, clients, events);
                     threadPool.execute(client);
                 }
             }

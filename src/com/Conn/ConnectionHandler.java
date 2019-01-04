@@ -5,14 +5,8 @@ import com.Constants;
 import com.Entities.*;
 import com.Listeners.MessageCallback;
 import com.MessagingProtocol.IMessage;
-import com.MessagingProtocol.Messages.Replies.FriendReply;
-import com.MessagingProtocol.Messages.Replies.FriendsReply;
-import com.MessagingProtocol.Messages.Replies.UploadAudioMessageReply;
-import com.MessagingProtocol.Messages.Replies.UploadImageReply;
-import com.MessagingProtocol.Messages.Requests.FriendRequest;
-import com.MessagingProtocol.Messages.Requests.FriendsRequest;
-import com.MessagingProtocol.Messages.Requests.UploadAudioMessageRequest;
-import com.MessagingProtocol.Messages.Requests.UploadImageRequest;
+import com.MessagingProtocol.Messages.Replies.*;
+import com.MessagingProtocol.Messages.Requests.*;
 import com.MessagingProtocol.Messages.Updates.*;
 import com.Utils.MessageSerializer;
 
@@ -30,6 +24,10 @@ public class ConnectionHandler implements Runnable {
      *
      */
     private ConcurrentHashMap<String, ConnectionHandler> clients;
+    /**
+     *
+     */
+    private ConcurrentHashMap<String, Event> events;
     /**
      *
      */
@@ -67,9 +65,10 @@ public class ConnectionHandler implements Runnable {
      * @param socket
      * @param clients
      */
-    public ConnectionHandler(Socket socket, ConcurrentHashMap<String, ConnectionHandler> clients) {
+    public ConnectionHandler(Socket socket, ConcurrentHashMap<String, ConnectionHandler> clients, ConcurrentHashMap<String, Event> events) {
         this.socket = socket;
         this.clients = clients;
+        this.events = events;
         this.imageClient = ImageClient.getInstance();
         try {
             toClient = new DataOutputStream(this.socket.getOutputStream());
@@ -231,8 +230,9 @@ public class ConnectionHandler implements Runnable {
             }
 
             @Override
-            public void onEventCreationRequest() {
-
+            public void onEventCreationRequest(Event event) {
+                events.put(event.getEventUID(), event);
+                clients.values().forEach(client -> client.writeMessage(new EventCreationReply("SERVER", event.getEventCreator(), event.getLocation(), event.getEventName(), event.getEventUID(), event.getExpirationDateAsString())));
             }
         });
     }
@@ -285,6 +285,8 @@ public class ConnectionHandler implements Runnable {
                 case FriendReply_Message:
                     messageHandler.handleFriendReply((FriendReply) message);
                     break;
+                case EventCreationRequest_Message:
+                    messageHandler.handleEventCreationRequest((EventCreationRequest) message);
             }
         }
     }
