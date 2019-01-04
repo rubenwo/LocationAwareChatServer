@@ -2,14 +2,8 @@ package com.Utils;
 
 import com.MessagingProtocol.IMessage;
 import com.MessagingProtocol.MessageType;
-import com.MessagingProtocol.Messages.Replies.FriendReply;
-import com.MessagingProtocol.Messages.Replies.FriendsReply;
-import com.MessagingProtocol.Messages.Replies.UploadAudioMessageReply;
-import com.MessagingProtocol.Messages.Replies.UploadImageReply;
-import com.MessagingProtocol.Messages.Requests.FriendRequest;
-import com.MessagingProtocol.Messages.Requests.FriendsRequest;
-import com.MessagingProtocol.Messages.Requests.UploadAudioMessageRequest;
-import com.MessagingProtocol.Messages.Requests.UploadImageRequest;
+import com.MessagingProtocol.Messages.Replies.*;
+import com.MessagingProtocol.Messages.Requests.*;
 import com.MessagingProtocol.Messages.Updates.*;
 import org.json.JSONObject;
 
@@ -116,6 +110,10 @@ public class MessageSerializer {
                     return FriendsRequest.fromJson(json);
                 case AuthenticationFailed_Message:
                     return AuthenticationFailedMessage.fromJson(json);
+                case EventCreationRequest_Message:
+                    return EventCreationRequest.fromJson(json);
+                case EventCreationReply_Message:
+                    return EventCreationReply.fromJson(json);
             }
         }
         return null;

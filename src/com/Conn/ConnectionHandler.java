@@ -229,6 +229,11 @@ public class ConnectionHandler implements Runnable {
             public void onUploadImageReply(String url) {
                 // Server should never get this message
             }
+
+            @Override
+            public void onEventCreationRequest() {
+
+            }
         });
     }
 

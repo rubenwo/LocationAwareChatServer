@@ -9,10 +9,7 @@ import com.MessagingProtocol.Messages.Replies.FriendReply;
 import com.MessagingProtocol.Messages.Replies.FriendsReply;
 import com.MessagingProtocol.Messages.Replies.UploadAudioMessageReply;
 import com.MessagingProtocol.Messages.Replies.UploadImageReply;
-import com.MessagingProtocol.Messages.Requests.FriendRequest;
-import com.MessagingProtocol.Messages.Requests.FriendsRequest;
-import com.MessagingProtocol.Messages.Requests.UploadAudioMessageRequest;
-import com.MessagingProtocol.Messages.Requests.UploadImageRequest;
+import com.MessagingProtocol.Messages.Requests.*;
 import com.MessagingProtocol.Messages.Updates.IdentificationMessage;
 import com.MessagingProtocol.Messages.Updates.LocationUpdateMessage;
 import com.MessagingProtocol.Messages.Updates.SignOutMessage;
@@ -193,6 +190,19 @@ public class MessageHandler {
                 callback.onAuthenticationFailed();
             else
                 callback.onUploadImageReply(message.getImageUrl());
+        });
+    }
+
+    /**
+     * @param message
+     */
+    public void handleEventCreationRequest(EventCreationRequest message) {
+        CompletableFuture.runAsync(() -> {
+            User authenticatedUser = UserAuthenticationService.authenticate(message.getFireBaseToken());
+            if (authenticatedUser == null)
+                callback.onAuthenticationFailed();
+            else
+                callback.onEventCreationRequest();
         });
     }
 

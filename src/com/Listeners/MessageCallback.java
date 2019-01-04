@@ -34,4 +34,6 @@ public interface MessageCallback {
     void onUploadAudioReply(String url);
 
     void onUploadImageReply(String url);
+
+    void onEventCreationRequest();
 }

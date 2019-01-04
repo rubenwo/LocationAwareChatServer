@@ -14,5 +14,7 @@ public enum MessageType {
     AuthenticationSuccessful_Message,
     AuthenticationFailed_Message,
     SignOut_Message,
-    Text_Message
+    Text_Message,
+    EventCreationRequest_Message,
+    EventCreationReply_Message
 }
