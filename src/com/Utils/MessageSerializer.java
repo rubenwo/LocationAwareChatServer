@@ -5,6 +5,7 @@ import com.MessagingProtocol.MessageType;
 import com.MessagingProtocol.Messages.Replies.*;
 import com.MessagingProtocol.Messages.Requests.*;
 import com.MessagingProtocol.Messages.Updates.*;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -78,7 +79,13 @@ public class MessageSerializer {
         }
         System.out.println("SERIALIZED:" + json);
         if (!json.isEmpty()) {
-            JSONObject obj = new JSONObject(json);
+            JSONObject obj;
+            try {
+                obj = new JSONObject(json);
+            } catch (JSONException e) {
+                e.printStackTrace();
+                return null;
+            }
             String messageType = obj.getString("messageType");
 
             System.out.println(messageType);

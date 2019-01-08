@@ -92,7 +92,7 @@ public class Server {
                 Socket socket = null;
                 try {
                     socket = serverSocket.accept();
-                    System.out.println("Connection established with client.");
+                    System.out.println("Connection established with client. Client IP: " + socket.getInetAddress().toString());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
