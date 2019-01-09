@@ -44,7 +44,7 @@ public class MessageHandler {
             if (authenticatedUser == null)
                 callback.onAuthenticationFailed();
             else
-                callback.onIdentificationMessage(authenticatedUser);
+                callback.onIdentificationMessage(authenticatedUser, message.getFireBaseMessagingId());
         });
 
     }

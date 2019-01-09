@@ -5,7 +5,7 @@ import com.Entities.*;
 import java.util.ArrayList;
 
 public interface MessageCallback {
-    void onIdentificationMessage(User authenticatedUser);
+    void onIdentificationMessage(User authenticatedUser, String fireBaseMessagingId);
 
     void onAuthenticationFailed();
 
@@ -33,4 +33,6 @@ public interface MessageCallback {
     void onUploadImageReply(String url);
 
     void onEventCreationRequest(Event event);
+
+    void onEventSubscriptionRequest();
 }

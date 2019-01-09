@@ -9,10 +9,12 @@ import com.MessagingProtocol.MessageType;
 public class IdentificationMessage implements IMessage {
     private MessageType messageType = MessageType.Identification_Message;
     private String fireBaseToken;
+    private String fireBaseMessagingId;
     private User sender = null;
 
-    public IdentificationMessage(String fireBaseToken) {
+    public IdentificationMessage(String fireBaseToken, String fireBaseMessagingId) {
         this.fireBaseToken = fireBaseToken;
+        this.fireBaseMessagingId = fireBaseMessagingId;
     }
 
     public static IdentificationMessage fromJson(String json) {
@@ -32,6 +34,10 @@ public class IdentificationMessage implements IMessage {
     @Override
     public String getFireBaseToken() {
         return fireBaseToken;
+    }
+
+    public String getFireBaseMessagingId() {
+        return fireBaseMessagingId;
     }
 
     @Override

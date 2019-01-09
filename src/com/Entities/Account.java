@@ -11,6 +11,10 @@ public class Account {
      *
      */
     private ArrayList<User> friends;
+    /**
+     *
+     */
+    private String fireBaseMessagingId;
 
     /**
      * @param user
@@ -32,5 +36,19 @@ public class Account {
      */
     public ArrayList<User> getFriends() {
         return friends;
+    }
+
+    /**
+     * @return
+     */
+    public String getFireBaseMessagingId() {
+        return fireBaseMessagingId;
+    }
+
+    /**
+     * @param fireBaseMessagingId
+     */
+    public void setFireBaseMessagingId(String fireBaseMessagingId) {
+        this.fireBaseMessagingId = fireBaseMessagingId;
     }
 }

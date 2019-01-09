@@ -9,12 +9,16 @@ import com.MessagingProtocol.Messages.Replies.*;
 import com.MessagingProtocol.Messages.Requests.*;
 import com.MessagingProtocol.Messages.Updates.*;
 import com.Utils.MessageSerializer;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.FirebaseMessagingException;
+import com.google.firebase.messaging.Message;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -84,12 +88,27 @@ public class ConnectionHandler implements Runnable {
              * @param authenticatedUser
              */
             @Override
-            public void onIdentificationMessage(User authenticatedUser) {
+            public void onIdentificationMessage(User authenticatedUser, String fireBaseMessagingId) {
                 clients.put(authenticatedUser.getUid(), ConnectionHandler.this);
                 user = authenticatedUser;
                 account = new Account(user);
+                account.setFireBaseMessagingId(fireBaseMessagingId);
                 System.out.println(user.toString());
                 writeMessage(new AuthenticationSuccesfulMessage("SERVER", user));
+                Message message = Message.builder()
+                        .putData("score", "850")
+                        .putData("time", "2:45")
+                        .setToken(fireBaseMessagingId)
+                        .build();
+
+                String response = null;
+                try {
+                    response = FirebaseMessaging.getInstance().send(message);
+                } catch (FirebaseMessagingException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("Successfully sent message: " + response);
+
             }
 
             /**
@@ -233,7 +252,21 @@ public class ConnectionHandler implements Runnable {
             public void onEventCreationRequest(Event event) {
                 events.put(event.getEventUID(), event);
                 clients.values().forEach(client -> client.writeMessage(new EventCreationReply("SERVER", event.getEventCreator(), event.getLocation(), event.getEventName(), event.getEventUID(), event.getExpirationDateAsString())));
+                checkExpiredEvents();
             }
+
+            @Override
+            public void onEventSubscriptionRequest() {
+
+            }
+        });
+    }
+
+    private void checkExpiredEvents() {
+        events.values().forEach(event -> {
+            LocalDate expirationDate = LocalDate.parse(event.getExpirationDateAsString());
+            if (expirationDate.isAfter(LocalDate.now()))
+                events.remove(event.getEventUID());
         });
     }
 
