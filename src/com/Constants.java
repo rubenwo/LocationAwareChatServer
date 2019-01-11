@@ -24,7 +24,7 @@ public class Constants {
     /**
      *
      */
-    public static final String SERVER_IP_ADDRESS = "206.189.106.64";
+    public static final String SERVER_IP_ADDRESS = "127.0.0.1";
     /**
      *
      */

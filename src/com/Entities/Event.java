@@ -34,4 +34,15 @@ public class Event {
     public User getEventCreator() {
         return eventCreator;
     }
+
+    @Override
+    public String toString() {
+        return "Event{" +
+                "location=" + location +
+                ", eventName='" + eventName + '\'' +
+                ", eventUID='" + eventUID + '\'' +
+                ", expirationDateAsString='" + expirationDateAsString + '\'' +
+                ", eventCreator=" + eventCreator +
+                '}';
+    }
 }

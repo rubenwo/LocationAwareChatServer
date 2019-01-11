@@ -39,6 +39,13 @@ public class Account {
     }
 
     /**
+     * @param friends
+     */
+    public void setFriends(ArrayList<User> friends) {
+        this.friends = friends;
+    }
+
+    /**
      * @return
      */
     public String getFireBaseMessagingId() {
@@ -50,5 +57,14 @@ public class Account {
      */
     public void setFireBaseMessagingId(String fireBaseMessagingId) {
         this.fireBaseMessagingId = fireBaseMessagingId;
+    }
+
+    @Override
+    public String toString() {
+        return "Account{" +
+                "user=" + user +
+                ", friends=" + friends +
+                ", fireBaseMessagingId='" + fireBaseMessagingId + '\'' +
+                '}';
     }
 }

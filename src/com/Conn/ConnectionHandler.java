@@ -8,6 +8,7 @@ import com.MessagingProtocol.IMessage;
 import com.MessagingProtocol.Messages.Replies.*;
 import com.MessagingProtocol.Messages.Requests.*;
 import com.MessagingProtocol.Messages.Updates.*;
+import com.Services.IObserver;
 import com.Utils.MessageSerializer;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
@@ -429,4 +430,6 @@ public class ConnectionHandler implements Runnable {
     public ImageClient getImageClient() {
         return imageClient;
     }
+
+
 }
