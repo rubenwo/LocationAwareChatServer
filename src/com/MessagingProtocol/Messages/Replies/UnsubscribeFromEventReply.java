@@ -1,25 +1,22 @@
 package com.MessagingProtocol.Messages.Replies;
 
 import com.Constants;
-import com.Entities.Event;
 import com.Entities.User;
 import com.MessagingProtocol.IMessage;
 import com.MessagingProtocol.MessageType;
 
-public class SubscribeToEventReply implements IMessage {
-    private MessageType messageType = MessageType.SubscribeToEventReply_Message;
+public class UnsubscribeFromEventReply implements IMessage {
+    private MessageType messageType = MessageType.UnsubscribeFromEventReply_Message;
     private String fireBaseToken;
     private User sender;
-    private Event event;
 
-    public SubscribeToEventReply(String fireBaseToken, User sender, Event event) {
+    public UnsubscribeFromEventReply(String fireBaseToken, User sender) {
         this.fireBaseToken = fireBaseToken;
         this.sender = sender;
-        this.event = event;
     }
 
-    public static SubscribeToEventReply fromJson(String json) {
-        return Constants.GSON.fromJson(json, SubscribeToEventReply.class);
+    public static UnsubscribeFromEventReply fromJson(String json) {
+        return Constants.GSON.fromJson(json, UnsubscribeFromEventReply.class);
     }
 
     @Override
@@ -35,10 +32,6 @@ public class SubscribeToEventReply implements IMessage {
     @Override
     public User getSender() {
         return sender;
-    }
-
-    public Event getEvent() {
-        return event;
     }
 
     @Override

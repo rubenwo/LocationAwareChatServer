@@ -6,20 +6,22 @@ import com.Entities.User;
 import com.MessagingProtocol.IMessage;
 import com.MessagingProtocol.MessageType;
 
-public class SubscribeToEventReply implements IMessage {
-    private MessageType messageType = MessageType.SubscribeToEventReply_Message;
+import java.util.ArrayList;
+
+public class GetAllEventsReply implements IMessage {
+    private MessageType messageType = MessageType.GetAllEventsReply_Message;
     private String fireBaseToken;
     private User sender;
-    private Event event;
+    private ArrayList<Event> events;
 
-    public SubscribeToEventReply(String fireBaseToken, User sender, Event event) {
+    public GetAllEventsReply(String fireBaseToken, User sender, ArrayList<Event> events) {
         this.fireBaseToken = fireBaseToken;
         this.sender = sender;
-        this.event = event;
+        this.events = events;
     }
 
-    public static SubscribeToEventReply fromJson(String json) {
-        return Constants.GSON.fromJson(json, SubscribeToEventReply.class);
+    public static GetAllEventsReply fromJson(String json) {
+        return Constants.GSON.fromJson(json, GetAllEventsReply.class);
     }
 
     @Override
@@ -37,8 +39,8 @@ public class SubscribeToEventReply implements IMessage {
         return sender;
     }
 
-    public Event getEvent() {
-        return event;
+    public ArrayList<Event> getEvents() {
+        return events;
     }
 
     @Override

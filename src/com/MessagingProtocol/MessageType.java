@@ -16,5 +16,11 @@ public enum MessageType {
     SignOut_Message,
     Text_Message,
     EventCreationRequest_Message,
-    EventCreationReply_Message
+    EventCreationReply_Message,
+    SubscribeToEventRequest_Message,
+    SubscribeToEventReply_Message,
+    UnsubscribeFromEventRequest_Message,
+    UnsubscribeFromEventReply_Message,
+    GetAllEventsRequest_Message,
+    GetAllEventsReply_Message
 }

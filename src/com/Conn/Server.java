@@ -69,6 +69,7 @@ public class Server {
         }
         threadPool = new ThreadPoolExecutor(0, 1500, 60, TimeUnit.DAYS, new ArrayBlockingQueue<>(2));
         clients = new ConcurrentHashMap<>();
+        events = new ConcurrentHashMap<>();
         connectionListener = new Thread(listenForTcpConnection());
         connectionListener.start();
         System.out.println("Server has started!");
