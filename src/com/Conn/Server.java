@@ -81,6 +81,15 @@ public class Server implements IObserver {
 
         DatabaseService databaseService = DatabaseService.getInstance();
         databaseService.subscribe(this);
+     /*   Account account = new Account(new User("Bla", "test", "testUID"));
+        ArrayList<User> friends = new ArrayList<>();
+        friends.add(new User("Hoi", "DSA", "friendUID"));
+        account.setFriends(friends);
+        account.setFireBaseMessagingId("firebase messaging id");
+        ArrayList<IMessage> message = new ArrayList<>();
+        message.add(new TextMessage("FireBaseToken", "Hallo", new User("Bla", "test", "testUID"), new User("Bla", "test", "testUID")));
+        account.setStoredMessages(message);
+        databaseService.insertAccount(account);*/
     }
 
     /**

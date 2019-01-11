@@ -5,9 +5,10 @@ import com.Entities.Event;
 import com.Entities.Location;
 import com.Entities.User;
 import com.google.firebase.database.*;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -52,37 +53,8 @@ public class DatabaseService implements IObservable {
         cachedUsers = new ArrayList<>();
         userReference = FirebaseDatabase.getInstance()
                 .getReference("/users");
-        userReference.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                cacheUsers((Map<String, User>) dataSnapshot.getValue());
 
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                cacheUsers((Map<String, User>) dataSnapshot.getValue());
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-                cacheUsers((Map<String, User>) dataSnapshot.getValue());
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-                cacheUsers((Map<String, User>) dataSnapshot.getValue());
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                System.out.println(databaseError.getMessage());
-            }
-        });
-        userReference.addListenerForSingleValueEvent(new ValueEventListener() {
+        userReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 System.out.println("OnDataChange in users");
@@ -97,34 +69,8 @@ public class DatabaseService implements IObservable {
         });
         accountReference = FirebaseDatabase.getInstance()
                 .getReference("/accounts");
-        accountReference.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                cacheAccounts((Map<String, Account>) dataSnapshot.getValue());
-            }
 
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                cacheAccounts((Map<String, Account>) dataSnapshot.getValue());
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-                cacheAccounts((Map<String, Account>) dataSnapshot.getValue());
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-                cacheAccounts((Map<String, Account>) dataSnapshot.getValue());
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                System.out.println(databaseError.getMessage());
-
-            }
-        });
-        accountReference.addListenerForSingleValueEvent(new ValueEventListener() {
+        accountReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 System.out.println("OnDataChange in accounts");
@@ -138,33 +84,8 @@ public class DatabaseService implements IObservable {
         });
         eventReference = FirebaseDatabase.getInstance()
                 .getReference("/events");
-        eventReference.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                cacheEvents((Map<String, Event>) dataSnapshot.getValue());
-            }
 
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                cacheEvents((Map<String, Event>) dataSnapshot.getValue());
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-                cacheEvents((Map<String, Event>) dataSnapshot.getValue());
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-                cacheEvents((Map<String, Event>) dataSnapshot.getValue());
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                System.out.println(databaseError.getMessage());
-            }
-        });
-        eventReference.addListenerForSingleValueEvent(new ValueEventListener() {
+        eventReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 System.out.println("OnDataChange in events");
@@ -207,51 +128,64 @@ public class DatabaseService implements IObservable {
     private void cacheAccounts(Map<String, Account> accountMap) {
         cachedAccounts.clear();
         System.out.println("Caching accounts");
-
         for (Map.Entry<String, Account> entry : accountMap.entrySet()) {
             Map singleAccount = (Map) entry.getValue();
-            Map userMap = (Map) singleAccount.get("user");
+
+            JSONObject obj = new JSONObject(singleAccount);
+
+            ArrayList<User> friends = new ArrayList<>();
             User user = new User(
-                    userMap.get("name").toString(),
-                    userMap.get("email").toString(),
-                    userMap.get("uid").toString());
+                    obj.getJSONObject("user").getString("name"),
+                    obj.getJSONObject("user").getString("email"),
+                    obj.getJSONObject("user").getString("uid")
+            );
             Account account = new Account(user);
-            account.setFireBaseMessagingId(singleAccount.get("fireBaseMessagingId").toString());
+            account.setFireBaseMessagingId(obj.getString("fireBaseMessagingId"));
             if (singleAccount.containsKey("friends")) {
-                User[] friendsArray = (User[]) singleAccount.get("friends");
-                ArrayList<User> friends = new ArrayList<>();
-                Collections.addAll(friends, friendsArray);
+                JSONArray storedFriends = obj.getJSONArray("friends");
+                for (int idx = 0; idx < storedFriends.length(); idx++)
+                    friends.add(new User(
+                            storedFriends.getJSONObject(idx).getString("name"),
+                            storedFriends.getJSONObject(idx).getString("email"),
+                            storedFriends.getJSONObject(idx).getString("uid")
+                    ));
                 account.setFriends(friends);
             }
             cachedAccounts.add(account);
-        }
 
+        }
         observers.forEach(observer -> observer.notifyAccountDataChanged(cachedAccounts));
     }
 
     private void cacheEvents(Map<String, Event> eventMap) {
         cachedEvents.clear();
         System.out.println("Caching events");
-
         for (Map.Entry<String, Event> entry : eventMap.entrySet()) {
             Map singleEvent = (Map) entry.getValue();
-            Map userMap = (Map) singleEvent.get("eventCreator");
-            User eventCreator = new User(
-                    userMap.get("name").toString(),
-                    userMap.get("email").toString(),
-                    userMap.get("uid").toString());
-            Map eventLocationMap = (Map) singleEvent.get("location");
-            Location eventLocation = new Location(
-                    (double) eventLocationMap.get("latitude"),
-                    (double) eventLocationMap.get("longitude")
-            );
-            cachedEvents.add(
-                    new Event(eventLocation,
-                            singleEvent.get("eventName").toString(),
-                            singleEvent.get("eventUID").toString(),
-                            singleEvent.get("expirationDateAsString").toString(),
-                            eventCreator)
-            );
+            JSONObject obj = null;
+            try {
+                obj = new JSONObject(singleEvent);
+
+                User eventCreator = new User(
+                        obj.getJSONObject("eventCreator").getString("name"),
+                        obj.getJSONObject("eventCreator").getString("email"),
+                        obj.getJSONObject("eventCreator").getString("uid")
+                );
+                Map eventLocationMap = (Map) singleEvent.get("location");
+                Location eventLocation = new Location(
+                        (double) eventLocationMap.get("latitude"),
+                        (double) eventLocationMap.get("longitude")
+                );
+                cachedEvents.add(
+                        new Event(eventLocation,
+                                singleEvent.get("eventName").toString(),
+                                singleEvent.get("eventUID").toString(),
+                                singleEvent.get("expirationDateAsString").toString(),
+                                eventCreator)
+                );
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         observers.forEach(observer -> observer.notifyEventDataChanged(cachedEvents));
     }
