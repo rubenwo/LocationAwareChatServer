@@ -8,7 +8,7 @@ import com.MessagingProtocol.IMessage;
 import com.MessagingProtocol.Messages.Replies.*;
 import com.MessagingProtocol.Messages.Requests.*;
 import com.MessagingProtocol.Messages.Updates.*;
-import com.Services.IObserver;
+import com.Services.Database.DatabaseService;
 import com.Utils.MessageSerializer;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
@@ -76,9 +76,9 @@ public class ConnectionHandler implements Runnable {
         this.events = events;
         this.imageClient = ImageClient.getInstance();
         try {
+            fromClient = new DataInputStream(this.socket.getInputStream());
             toClient = new DataOutputStream(this.socket.getOutputStream());
             toClient.flush();
-            fromClient = new DataInputStream(this.socket.getInputStream());
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -92,10 +92,17 @@ public class ConnectionHandler implements Runnable {
             public void onIdentificationMessage(User authenticatedUser, String fireBaseMessagingId) {
                 clients.put(authenticatedUser.getUid(), ConnectionHandler.this);
                 user = authenticatedUser;
-                account = new Account(user);
-                account.setFireBaseMessagingId(fireBaseMessagingId);
-                System.out.println(user.toString());
+                System.out.println(user.toString() + " came online.");
+                DatabaseService.getInstance().insertUser(authenticatedUser);
+                account = DatabaseService.getInstance().getAccount(user);
+                if (account == null) {
+                    account = new Account(user);
+                    account.setFireBaseMessagingId(fireBaseMessagingId);
+                    DatabaseService.getInstance().insertAccount(account);
+                }
+
                 writeMessage(new AuthenticationSuccesfulMessage("SERVER", user));
+
                 Message message = Message.builder()
                         .putData("score", "850")
                         .putData("time", "2:45")
@@ -109,7 +116,6 @@ public class ConnectionHandler implements Runnable {
                     e.printStackTrace();
                 }
                 System.out.println("Successfully sent message: " + response);
-
             }
 
             /**
@@ -218,6 +224,8 @@ public class ConnectionHandler implements Runnable {
                 if (!approved) {
                     writeMessage(new FriendReply("SERVER", user, null, false));
                 } else {
+                    account.getFriends().add(friend);
+                    DatabaseService.getInstance().insertAccount(account);
                     writeMessage(new FriendReply("SERVER", user, friend, true));
                 }
             }
@@ -252,23 +260,41 @@ public class ConnectionHandler implements Runnable {
             @Override
             public void onEventCreationRequest(Event event) {
                 events.put(event.getEventUID(), event);
+                DatabaseService.getInstance().insertEvent(event);
                 clients.values().forEach(client -> client.writeMessage(new EventCreationReply("SERVER", event.getEventCreator(), event.getLocation(), event.getEventName(), event.getEventUID(), event.getExpirationDateAsString())));
                 checkExpiredEvents();
             }
 
             @Override
-            public void onEventSubscriptionRequest() {
+            public void onGetAllEventsRequest() {
+                ArrayList<Event> eventsList = new ArrayList();
+                for (Event event : events.values())
+                    eventsList.add(event);
+                writeMessage(new GetAllEventsReply("SERVER", null, eventsList));
+            }
+
+            @Override
+            public void onEventSubscriptionRequest(String eventUID) {
+
+            }
+
+            @Override
+            public void onUnsubscribeFromEventRequest(String eventUID) {
 
             }
         });
     }
 
     private void checkExpiredEvents() {
+
         events.values().forEach(event -> {
             LocalDate expirationDate = LocalDate.parse(event.getExpirationDateAsString());
-            if (expirationDate.isAfter(LocalDate.now()))
+            if (expirationDate.isBefore(LocalDate.now())) {
                 events.remove(event.getEventUID());
+                DatabaseService.getInstance().deleteEvent(event);
+            }
         });
+
     }
 
     /**
@@ -321,6 +347,16 @@ public class ConnectionHandler implements Runnable {
                     break;
                 case EventCreationRequest_Message:
                     messageHandler.handleEventCreationRequest((EventCreationRequest) message);
+                    break;
+                case UnsubscribeFromEventRequest_Message:
+                    messageHandler.handleUnsubscribeFromEventRequest((UnsubscribeFromEventRequest) message);
+                    break;
+                case SubscribeToEventRequest_Message:
+                    messageHandler.handleSubscribeToEventRequest((SubscribeToEventRequest) message);
+                    break;
+                case GetAllEventsRequest_Message:
+                    messageHandler.handleGetAllEventsRequest((GetAllEventsRequest) message);
+                    break;
             }
         }
     }

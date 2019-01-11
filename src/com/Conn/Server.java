@@ -3,10 +3,9 @@ package com.Conn;
 import com.Constants;
 import com.Entities.Account;
 import com.Entities.Event;
-import com.Entities.Location;
 import com.Entities.User;
-import com.Services.DatabaseService;
-import com.Services.IObserver;
+import com.Services.Database.DatabaseService;
+import com.Services.Database.IObserver;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
@@ -82,15 +81,6 @@ public class Server implements IObserver {
 
         DatabaseService databaseService = DatabaseService.getInstance();
         databaseService.subscribe(this);
-        // databaseService.insertUser(new User("Ruben", "rubenwoldhuis@gmail.com", "testing_uid"));
-        Account account = new Account(new User("Ruben", "test@gmail.com", "testing_UID"));
-        account.setFireBaseMessagingId("FirebaseMessagingID");
-        ArrayList<User> friends = new ArrayList<>();
-        friends.add(new User("Ruben", "test@gmail.com", "testing_UID"));
-        account.setFriends(friends);
-        databaseService.insertAccount(account);
-        databaseService.insertUser(new User("Ruben", "test@gmail.com", "testing_UID"));
-        databaseService.insertEvent(new Event(new Location(10.23, 12343.432), "Event_name", "SOMEEVENTUID", "10-20-1203", new User("Ruben", "test@gmail.com", "testing_UID")));
     }
 
     /**
@@ -117,7 +107,8 @@ public class Server implements IObserver {
                 }
                 if (socket != null) {
                     ConnectionHandler client = new ConnectionHandler(socket, clients, events);
-                    threadPool.execute(client);
+                    new Thread(client).start();
+                    //threadPool.execute(client);
                 }
             }
         };
@@ -126,6 +117,8 @@ public class Server implements IObserver {
     @Override
     public void notifyEventDataChanged(ArrayList<Event> events) {
         System.out.println("There are: " + events.size() + " events.");
+        for (Event event : events)
+            this.events.put(event.getEventUID(), event);
     }
 
     @Override

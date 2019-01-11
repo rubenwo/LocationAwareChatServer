@@ -202,6 +202,7 @@ public class MessageHandler {
     public void handleEventCreationRequest(EventCreationRequest message) {
         CompletableFuture.runAsync(() -> {
             User authenticatedUser = UserAuthenticationService.authenticate(message.getFireBaseToken());
+            System.out.println(authenticatedUser);
             if (authenticatedUser == null)
                 callback.onAuthenticationFailed();
             else {
@@ -210,6 +211,48 @@ public class MessageHandler {
                 LocalDate eventExpiration = eventCreationDate.plusDays(1);
                 Event event = new Event(message.getLocation(), message.getEventName(), uid, eventExpiration.toString(), message.getSender());
                 callback.onEventCreationRequest(event);
+            }
+        });
+    }
+
+    /**
+     * @param message
+     */
+    public void handleGetAllEventsRequest(GetAllEventsRequest message) {
+        CompletableFuture.runAsync(() -> {
+            User authenticatedUser = UserAuthenticationService.authenticate(message.getFireBaseToken());
+            if (authenticatedUser == null)
+                callback.onAuthenticationFailed();
+            else {
+                callback.onGetAllEventsRequest();
+            }
+        });
+    }
+
+    /**
+     * @param message
+     */
+    public void handleSubscribeToEventRequest(SubscribeToEventRequest message) {
+        CompletableFuture.runAsync(() -> {
+            User authenticatedUser = UserAuthenticationService.authenticate(message.getFireBaseToken());
+            if (authenticatedUser == null)
+                callback.onAuthenticationFailed();
+            else {
+                callback.onEventSubscriptionRequest(message.getEventUID());
+            }
+        });
+    }
+
+    /**
+     * @param message
+     */
+    public void handleUnsubscribeFromEventRequest(UnsubscribeFromEventRequest message) {
+        CompletableFuture.runAsync(() -> {
+            User authenticatedUser = UserAuthenticationService.authenticate(message.getFireBaseToken());
+            if (authenticatedUser == null)
+                callback.onAuthenticationFailed();
+            else {
+                callback.onUnsubscribeFromEventRequest(message.getEventUID());
             }
         });
     }

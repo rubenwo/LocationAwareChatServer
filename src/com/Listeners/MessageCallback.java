@@ -34,5 +34,9 @@ public interface MessageCallback {
 
     void onEventCreationRequest(Event event);
 
-    void onEventSubscriptionRequest();
+    void onGetAllEventsRequest();
+
+    void onEventSubscriptionRequest(String eventUID);
+
+    void onUnsubscribeFromEventRequest(String eventUID);
 }

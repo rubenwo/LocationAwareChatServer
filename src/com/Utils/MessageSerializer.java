@@ -121,6 +121,20 @@ public class MessageSerializer {
                     return EventCreationRequest.fromJson(json);
                 case EventCreationReply_Message:
                     return EventCreationReply.fromJson(json);
+                case GetAllEventsReply_Message:
+                    return GetAllEventsReply.fromJson(json);
+                case GetAllEventsRequest_Message:
+                    return GetAllEventsRequest.fromJson(json);
+                case SubscribeToEventReply_Message:
+                    return SubscribeToEventReply.fromJson(json);
+                case SubscribeToEventRequest_Message:
+                    return SubscribeToEventRequest.fromJson(json);
+                case AuthenticationSuccessful_Message:
+                    return AuthenticationSuccesfulMessage.fromJson(json);
+                case UnsubscribeFromEventReply_Message:
+                    return UnsubscribeFromEventReply.fromJson(json);
+                case UnsubscribeFromEventRequest_Message:
+                    return UnsubscribeFromEventRequest.fromJson(json);
             }
         }
         return null;
