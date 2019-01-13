@@ -11,10 +11,7 @@ import com.MessagingProtocol.Messages.Replies.FriendsReply;
 import com.MessagingProtocol.Messages.Replies.UploadAudioMessageReply;
 import com.MessagingProtocol.Messages.Replies.UploadImageReply;
 import com.MessagingProtocol.Messages.Requests.*;
-import com.MessagingProtocol.Messages.Updates.IdentificationMessage;
-import com.MessagingProtocol.Messages.Updates.LocationUpdateMessage;
-import com.MessagingProtocol.Messages.Updates.SignOutMessage;
-import com.MessagingProtocol.Messages.Updates.TextMessage;
+import com.MessagingProtocol.Messages.Updates.*;
 import com.Services.UserAuthenticationService;
 
 import java.time.LocalDate;
@@ -211,6 +208,21 @@ public class MessageHandler {
                 LocalDate eventExpiration = eventCreationDate.plusDays(1);
                 Event event = new Event(message.getLocation(), message.getEventName(), uid, eventExpiration.toString(), message.getSender());
                 callback.onEventCreationRequest(event);
+            }
+        });
+    }
+
+    /**
+     * @param message
+     */
+    public void handleEventChatMessage(EventChatMessage message) {
+        CompletableFuture.runAsync(() -> {
+            User authenticatedUser = UserAuthenticationService.authenticate(message.getFireBaseToken());
+            System.out.println(authenticatedUser);
+            if (authenticatedUser == null)
+                callback.onAuthenticationFailed();
+            else {
+                callback.onEventChatMessage(message.getEventUID(), message.getSender(), message.getContent());
             }
         });
     }

@@ -1,6 +1,7 @@
 package com.Listeners;
 
 import com.Entities.*;
+import com.MessagingProtocol.IMessage;
 
 import java.util.ArrayList;
 
@@ -33,6 +34,8 @@ public interface MessageCallback {
     void onUploadImageReply(String url);
 
     void onEventCreationRequest(Event event);
+
+    void onEventChatMessage(String eventUID, User sender, IMessage... content);
 
     void onGetAllEventsRequest();
 

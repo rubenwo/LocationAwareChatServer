@@ -257,6 +257,10 @@ public class ConnectionHandler implements Runnable {
                 // Server should never get this message
             }
 
+            /**
+             *
+             * @param event
+             */
             @Override
             public void onEventCreationRequest(Event event) {
                 events.put(event.getEventUID(), event);
@@ -265,6 +269,34 @@ public class ConnectionHandler implements Runnable {
                 checkExpiredEvents();
             }
 
+            /**
+             *
+             * @param eventUID
+             * @param sender
+             * @param content
+             */
+            @Override
+            public void onEventChatMessage(String eventUID, User sender, IMessage... content) {
+                Event event = events.get(eventUID);
+
+                for (IMessage msg : content) {
+                    switch (msg.getMessageType()) {
+                        case Text_Message:
+                            event.getSubscribedUserUIDs().forEach(uid -> clients.get(uid).writeMessage(msg));
+                            break;
+                        case UploadImageRequest_Message:
+                            event.getSubscribedUserUIDs().forEach(uid -> clients.get(uid).writeMessage(msg));
+                            break;
+                        case UploadAudioRequest_Message:
+                            event.getSubscribedUserUIDs().forEach(uid -> clients.get(uid).writeMessage(msg));
+                            break;
+                    }
+                }
+            }
+
+            /**
+             *
+             */
             @Override
             public void onGetAllEventsRequest() {
                 ArrayList<Event> eventsList = new ArrayList();
@@ -273,18 +305,35 @@ public class ConnectionHandler implements Runnable {
                 writeMessage(new GetAllEventsReply("SERVER", null, eventsList));
             }
 
+            /**
+             *
+             * @param eventUID
+             */
             @Override
             public void onEventSubscriptionRequest(String eventUID) {
-
+                Event event = events.get(eventUID);
+                event.getSubscribedUserUIDs().add(user.getUid());
+                DatabaseService.getInstance().insertEvent(event);
+                writeMessage(new SubscribeToEventReply("SERVER", null, events.get(eventUID)));
             }
 
+            /**
+             *
+             * @param eventUID
+             */
             @Override
             public void onUnsubscribeFromEventRequest(String eventUID) {
-
+                Event event = events.get(eventUID);
+                event.getSubscribedUserUIDs().remove(user.getUid());
+                DatabaseService.getInstance().insertEvent(event);
+                writeMessage(new UnsubscribeFromEventReply("SERVER", null));
             }
         });
     }
 
+    /**
+     *
+     */
     private void checkExpiredEvents() {
 
         events.values().forEach(event -> {
@@ -356,6 +405,9 @@ public class ConnectionHandler implements Runnable {
                     break;
                 case GetAllEventsRequest_Message:
                     messageHandler.handleGetAllEventsRequest((GetAllEventsRequest) message);
+                    break;
+                case EventChat_Message:
+                    messageHandler.handleEventChatMessage((EventChatMessage) message);
                     break;
             }
         }

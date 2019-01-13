@@ -1,11 +1,14 @@
 package com.Entities;
 
+import java.util.ArrayList;
+
 public class Event {
     private Location location;
     private String eventName;
     private String eventUID;
     private String expirationDateAsString;
     private User eventCreator;
+    private ArrayList<String> subscribedUserUIDs;
 
     public Event(Location location, String eventName, String eventUID, String expirationDateAsString, User eventCreator) {
         this.location = location;
@@ -13,6 +16,7 @@ public class Event {
         this.eventUID = eventUID;
         this.expirationDateAsString = expirationDateAsString;
         this.eventCreator = eventCreator;
+        subscribedUserUIDs = new ArrayList<>();
     }
 
     public Location getLocation() {
@@ -33,6 +37,10 @@ public class Event {
 
     public User getEventCreator() {
         return eventCreator;
+    }
+
+    public ArrayList<String> getSubscribedUserUIDs() {
+        return subscribedUserUIDs;
     }
 
     @Override

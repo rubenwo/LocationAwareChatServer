@@ -15,6 +15,10 @@ public class Account {
      *
      */
     private String fireBaseMessagingId;
+    /**
+     *
+     */
+    private ArrayList<String> subscribedEvents;
 
     /**
      * @param user
@@ -22,6 +26,7 @@ public class Account {
     public Account(User user) {
         this.user = user;
         friends = new ArrayList<>();
+        subscribedEvents = new ArrayList<>();
     }
 
     /**
@@ -59,12 +64,21 @@ public class Account {
         this.fireBaseMessagingId = fireBaseMessagingId;
     }
 
+    public ArrayList<String> getSubscribedEvents() {
+        return subscribedEvents;
+    }
+
+    public void setSubscribedEvents(ArrayList<String> subscribedEvents) {
+        this.subscribedEvents = subscribedEvents;
+    }
+
     @Override
     public String toString() {
         return "Account{" +
                 "user=" + user +
                 ", friends=" + friends +
                 ", fireBaseMessagingId='" + fireBaseMessagingId + '\'' +
+                ", subscribedEvents=" + subscribedEvents +
                 '}';
     }
 }
