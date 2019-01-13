@@ -3,7 +3,6 @@ package com.Conn;
 import com.Constants;
 import com.Entities.Account;
 import com.Entities.Event;
-import com.Entities.User;
 import com.Services.Database.DatabaseService;
 import com.Services.Database.IObserver;
 import com.google.auth.oauth2.GoogleCredentials;
@@ -85,15 +84,8 @@ public class Server implements IObserver {
 
         DatabaseService databaseService = DatabaseService.getInstance();
         databaseService.subscribe(this);
-     /*   Account account = new Account(new User("Bla", "test", "testUID"));
-        ArrayList<User> friends = new ArrayList<>();
-        friends.add(new User("Hoi", "DSA", "friendUID"));
-        account.setFriends(friends);
-        account.setFireBaseMessagingId("firebase messaging id");
-        ArrayList<IMessage> message = new ArrayList<>();
-        message.add(new TextMessage("FireBaseToken", "Hallo", new User("Bla", "test", "testUID"), new User("Bla", "test", "testUID")));
-        account.setStoredMessages(message);
-        databaseService.insertAccount(account);*/
+        //   databaseService.storeMessage("TEST", new TextMessage("FireBaseToken", "Hallo", new User("Bla", "test", "testUID"), new User("Bla", "test", "testUID")));
+
     }
 
     /**
@@ -128,20 +120,12 @@ public class Server implements IObserver {
     }
 
     @Override
-    public void notifyEventDataChanged(ArrayList<Event> events) {
-        System.out.println("There are: " + events.size() + " events.");
-        for (Event event : events)
+    public void notifyDataChanged() {
+        for (Event event : DatabaseService.getInstance().getCachedEvents())
             this.events.put(event.getEventUID(), event);
-    }
-
-    @Override
-    public void notifyUserDataChanged(ArrayList<User> users) {
-        System.out.println("There are: " + users.size() + " users.");
-    }
-
-    @Override
-    public void notifyAccountDataChanged(ArrayList<Account> accounts) {
+        System.out.println("There are: " + events.size() + " events.");
+        System.out.println("There are: " + DatabaseService.getInstance().getCachedUsers().size() + " users.");
+        accounts = DatabaseService.getInstance().getCachedAccounts();
         System.out.println("There are: " + accounts.size() + " accounts.");
-        this.accounts = accounts;
     }
 }

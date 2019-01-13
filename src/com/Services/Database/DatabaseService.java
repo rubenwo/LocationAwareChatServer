@@ -5,12 +5,13 @@ import com.Entities.Event;
 import com.Entities.Location;
 import com.Entities.User;
 import com.MessagingProtocol.IMessage;
+import com.Utils.MessageSerializer;
 import com.google.firebase.database.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 public class DatabaseService implements IObservable {
@@ -34,6 +35,10 @@ public class DatabaseService implements IObservable {
     /**
      *
      */
+    private DatabaseReference messageReference;
+    /**
+     *
+     */
     private ArrayList<User> cachedUsers;
     /**
      *
@@ -43,6 +48,10 @@ public class DatabaseService implements IObservable {
      *
      */
     private ArrayList<Event> cachedEvents;
+    /**
+     *
+     */
+    private HashMap<String, ArrayList<IMessage>> cachedMessages;
 
     /**
      *
@@ -52,6 +61,7 @@ public class DatabaseService implements IObservable {
         cachedAccounts = new ArrayList<>();
         cachedEvents = new ArrayList<>();
         cachedUsers = new ArrayList<>();
+        cachedMessages = new HashMap<>();
         userReference = FirebaseDatabase.getInstance()
                 .getReference("/users");
 
@@ -100,7 +110,20 @@ public class DatabaseService implements IObservable {
             }
         });
 
+        messageReference = FirebaseDatabase.getInstance()
+                .getReference("/storedMessages");
+        messageReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                System.out.println("OnDataChange in messages");
+                cacheMessages((Map<String, ArrayList<IMessage>>) dataSnapshot.getValue());
+            }
 
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                System.out.println(databaseError.getMessage());
+            }
+        });
     }
 
     /**
@@ -123,7 +146,7 @@ public class DatabaseService implements IObservable {
                     singleUser.get("uid").toString()));
         }
 
-        observers.forEach(observer -> observer.notifyUserDataChanged(cachedUsers));
+        observers.forEach(IObserver::notifyDataChanged);
     }
 
     private void cacheAccounts(Map<String, Account> accountMap) {
@@ -155,7 +178,7 @@ public class DatabaseService implements IObservable {
             cachedAccounts.add(account);
 
         }
-        observers.forEach(observer -> observer.notifyAccountDataChanged(cachedAccounts));
+        observers.forEach(IObserver::notifyDataChanged);
     }
 
     private void cacheEvents(Map<String, Event> eventMap) {
@@ -188,7 +211,29 @@ public class DatabaseService implements IObservable {
                 e.printStackTrace();
             }
         }
-        observers.forEach(observer -> observer.notifyEventDataChanged(cachedEvents));
+        observers.forEach(IObserver::notifyDataChanged);
+    }
+
+    /**
+     * @param messages
+     */
+    private void cacheMessages(Map<String, ArrayList<IMessage>> messages) {
+        cachedMessages.clear();
+        try {
+            JSONObject obj = new JSONObject(messages);
+            for (String key : obj.keySet()) {
+                ArrayList<IMessage> msgs = new ArrayList<>();
+                JSONArray array = obj.getJSONArray(key);
+                for (int idx = 0; idx < array.length(); idx++) {
+                    byte[] data = array.get(idx).toString().getBytes();
+                    msgs.add(MessageSerializer.deserialize(data, false));
+                }
+                cachedMessages.put(key, msgs);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        observers.forEach(IObserver::notifyDataChanged);
     }
 
     /**
@@ -240,11 +285,17 @@ public class DatabaseService implements IObservable {
     }
 
     /**
-     * @param user
+     * @param userUID
      * @param message
      */
-    public void storeMessage(User user, IMessage message) {
+    public void storeMessage(String userUID, IMessage message) {
+        System.out.println("Adding: " + message.toJson() + " to database.");
+        ArrayList<IMessage> messages = cachedMessages.get(userUID);
+        if (messages == null)
+            messages = new ArrayList<>();
+        messages.add(message);
 
+        FirebaseDatabase.getInstance().getReference("/storedMessages/" + userUID).setValueAsync(messages);
     }
 
     /**
@@ -252,7 +303,10 @@ public class DatabaseService implements IObservable {
      * @return
      */
     public ArrayList<IMessage> getMessages(User user) {
-        return null;
+        ArrayList<IMessage> messages = cachedMessages.get(user.getUid());
+        if (messages == null)
+            messages = new ArrayList<>();
+        return messages;
     }
 
 
@@ -305,21 +359,21 @@ public class DatabaseService implements IObservable {
     /**
      * @return
      */
-    public List<User> getCachedUsers() {
+    public ArrayList<User> getCachedUsers() {
         return cachedUsers;
     }
 
     /**
      * @return
      */
-    public List<Account> getCachedAccounts() {
+    public ArrayList<Account> getCachedAccounts() {
         return cachedAccounts;
     }
 
     /**
      * @return
      */
-    public List<Event> getCachedEvents() {
+    public ArrayList<Event> getCachedEvents() {
         return cachedEvents;
     }
 

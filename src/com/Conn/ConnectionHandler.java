@@ -109,20 +109,6 @@ public class ConnectionHandler implements Runnable {
                 }
 
                 writeMessage(new AuthenticationSuccesfulMessage("SERVER", user));
-
-                Message message = Message.builder()
-                        .putData("score", "850")
-                        .putData("time", "2:45")
-                        .setToken(fireBaseMessagingId)
-                        .build();
-
-                String response = null;
-                try {
-                    response = FirebaseMessaging.getInstance().send(message);
-                } catch (FirebaseMessagingException e) {
-                    e.printStackTrace();
-                }
-                System.out.println("Successfully sent message: " + response);
             }
 
             /**
@@ -408,7 +394,7 @@ public class ConnectionHandler implements Runnable {
      * @param message
      */
     private void sendViaC2DM(String fireBaseMessagingID, IMessage message, User target) {
-        DatabaseService.getInstance().storeMessage(target, message);
+        DatabaseService.getInstance().storeMessage(target.getUid(), message);
 
         Message fcmMessage = Message.builder()
                 .setNotification(new Notification(
