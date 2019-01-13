@@ -41,6 +41,10 @@ public class Server implements IObserver {
     /**
      *
      */
+    private ArrayList<Account> accounts;
+    /**
+     *
+     */
     private ServerSocket serverSocket;
     /**
      *
@@ -115,7 +119,7 @@ public class Server implements IObserver {
                     e.printStackTrace();
                 }
                 if (socket != null) {
-                    ConnectionHandler client = new ConnectionHandler(socket, clients, events);
+                    ConnectionHandler client = new ConnectionHandler(socket, clients, accounts, events);
                     new Thread(client).start();
                     //threadPool.execute(client);
                 }
@@ -138,5 +142,6 @@ public class Server implements IObserver {
     @Override
     public void notifyAccountDataChanged(ArrayList<Account> accounts) {
         System.out.println("There are: " + accounts.size() + " accounts.");
+        this.accounts = accounts;
     }
 }

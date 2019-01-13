@@ -5,6 +5,7 @@ import com.Constants;
 import com.Entities.*;
 import com.Listeners.MessageCallback;
 import com.MessagingProtocol.IMessage;
+import com.MessagingProtocol.MessageType;
 import com.MessagingProtocol.Messages.Replies.*;
 import com.MessagingProtocol.Messages.Requests.*;
 import com.MessagingProtocol.Messages.Updates.*;
@@ -13,6 +14,7 @@ import com.Utils.MessageSerializer;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
+import com.google.firebase.messaging.Notification;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -21,6 +23,7 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -33,6 +36,10 @@ public class ConnectionHandler implements Runnable {
      *
      */
     private ConcurrentHashMap<String, Event> events;
+    /**
+     *
+     */
+    private ArrayList<Account> accounts;
     /**
      *
      */
@@ -70,9 +77,10 @@ public class ConnectionHandler implements Runnable {
      * @param socket
      * @param clients
      */
-    public ConnectionHandler(Socket socket, ConcurrentHashMap<String, ConnectionHandler> clients, ConcurrentHashMap<String, Event> events) {
+    public ConnectionHandler(Socket socket, ConcurrentHashMap<String, ConnectionHandler> clients, ArrayList<Account> accounts, ConcurrentHashMap<String, Event> events) {
         this.socket = socket;
         this.clients = clients;
+        this.accounts = accounts;
         this.events = events;
         this.imageClient = ImageClient.getInstance();
         try {
@@ -128,6 +136,13 @@ public class ConnectionHandler implements Runnable {
                 imageClient.addImageToUploadQueue(image.getName(), image.getExtension(), image.getData());
                 if (clients.containsKey(target.getUid()))
                     clients.get(target.getUid()).writeMessage(new UploadImageReply("SERVER", Constants.IMAGE_SERVER_LINK + image.getName() + image.getExtension(), user));
+                else
+                    for (Account acc : accounts) {
+                        if (acc.getUser().equals(target)) {
+                            sendViaC2DM(acc.getFireBaseMessagingId(), MessageType.UploadImageReply_Message);
+                            break;
+                        }
+                    }
                 writeMessage(new UploadImageReply("SERVER", Constants.IMAGE_SERVER_LINK + image.getName() + image.getExtension(), user));
             }
 
@@ -141,6 +156,13 @@ public class ConnectionHandler implements Runnable {
                 // TODO: Upload audio to a REST server. Also create this server :D
                 if (clients.containsKey(target.getUid()))
                     clients.get(target.getUid()).writeMessage(new UploadAudioMessageReply("SERVER", user, Constants.AUDIO_SERVER_LINK + audio.getName() + audio.getExtension()));
+                else
+                    for (Account acc : accounts) {
+                        if (acc.getUser().equals(target)) {
+                            sendViaC2DM(acc.getFireBaseMessagingId(), MessageType.UploadAudioReply_Message);
+                            break;
+                        }
+                    }
                 writeMessage(new UploadAudioMessageReply("SERVER", user, Constants.AUDIO_SERVER_LINK + audio.getName() + audio.getExtension()));
             }
 
@@ -150,8 +172,19 @@ public class ConnectionHandler implements Runnable {
              */
             @Override
             public void onLocationUpdateMessage(Location location) {
-                if (account != null)
-                    account.getFriends().forEach(friend -> clients.get(friend.getUid()).writeMessage(new LocationUpdateMessage("SERVER", location, user)));
+                if (account != null) {
+                    for (User friend : account.getFriends()) {
+                        if (clients.containsKey(friend.getUid()))
+                            clients.get(friend.getUid()).writeMessage(new LocationUpdateMessage("SERVER", location, user));
+                        else
+                            for (Account acc : accounts) {
+                                if (acc.getUser().equals(friend)) {
+                                    sendViaC2DM(acc.getFireBaseMessagingId(), MessageType.UploadAudioReply_Message);
+                                    break;
+                                }
+                            }
+                    }
+                }
                 user.setLocation(location);
             }
 
@@ -164,6 +197,13 @@ public class ConnectionHandler implements Runnable {
             public void onTextMessage(String textMessage, User target) {
                 if (clients.containsKey(target.getUid()))
                     clients.get(target.getUid()).writeMessage(new TextMessage("SERVER", textMessage, target, user));
+                else
+                    for (Account acc : accounts) {
+                        if (acc.getUser().equals(target)) {
+                            sendViaC2DM(acc.getFireBaseMessagingId(), MessageType.UploadAudioReply_Message);
+                            break;
+                        }
+                    }
             }
 
             /**
@@ -190,17 +230,38 @@ public class ConnectionHandler implements Runnable {
              */
             @Override
             public void onFriendRequest(String email) {
-                ConnectionHandler targetHandler = null;
-                for (ConnectionHandler handler : clients.values()) {
-                    if (handler.user.getEmail().equals(email)) {
-                        targetHandler = handler;
+                List<User> users = DatabaseService.getInstance().getCachedUsers();
+                User target = null;
+
+                for (User user : users) {
+                    if (user.getEmail().equals(email)) {
+                        target = user;
                         break;
                     }
                 }
-                if (targetHandler != null)
-                    targetHandler.writeMessage(new FriendRequest("SERVER", user.getEmail(), user));
-                else
+
+                if (target == null)
                     writeMessage(new FriendReply("SERVER", user, null, false));
+                else {
+                    ConnectionHandler targetHandler = null;
+                    for (ConnectionHandler handler : clients.values()) {
+                        if (handler.user.equals(target)) {
+                            targetHandler = handler;
+                            break;
+                        }
+                    }
+                    if (targetHandler != null)
+                        targetHandler.writeMessage(new FriendRequest("SERVER", user.getEmail(), user));
+                    else
+                        for (Account acc : accounts) {
+                            if (acc.getUser().equals(target)) {
+                                sendViaC2DM(acc.getFireBaseMessagingId(), MessageType.UploadAudioReply_Message);
+                                break;
+                            }
+                        }
+                }
+
+
             }
 
             /**
@@ -265,6 +326,12 @@ public class ConnectionHandler implements Runnable {
             public void onEventCreationRequest(Event event) {
                 events.put(event.getEventUID(), event);
                 DatabaseService.getInstance().insertEvent(event);
+
+                List<User> users = DatabaseService.getInstance().getCachedUsers();
+                for (User user : users) {
+                    Account account = DatabaseService.getInstance().getAccount(user);
+                    sendViaC2DM(account.getFireBaseMessagingId(), MessageType.EventCreationReply_Message);
+                }
                 clients.values().forEach(client -> client.writeMessage(new EventCreationReply("SERVER", event.getEventCreator(), event.getLocation(), event.getEventName(), event.getEventUID(), event.getExpirationDateAsString())));
                 checkExpiredEvents();
             }
@@ -329,6 +396,27 @@ public class ConnectionHandler implements Runnable {
                 writeMessage(new UnsubscribeFromEventReply("SERVER", null));
             }
         });
+    }
+
+    /**
+     * @param fireBaseMessagingID
+     * @param messageType
+     */
+    private void sendViaC2DM(String fireBaseMessagingID, MessageType messageType) {
+        Message message = Message.builder()
+                .setNotification(new Notification(
+                        "Location Aware Chat",
+                        messageType.toString()
+                ))
+                .setToken(fireBaseMessagingID)
+                .build();
+        String response = null;
+        try {
+            response = FirebaseMessaging.getInstance().send(message);
+        } catch (FirebaseMessagingException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Response from server: " + response);
     }
 
     /**

@@ -1,7 +1,6 @@
 package com.Entities;
 
 public class User {
-    //TODO: Add useful identification variables to User class.
     private String name;
     private String email;
     private String uid;
