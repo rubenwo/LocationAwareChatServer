@@ -4,6 +4,7 @@ import com.Entities.Account;
 import com.Entities.Event;
 import com.Entities.Location;
 import com.Entities.User;
+import com.MessagingProtocol.IMessage;
 import com.google.firebase.database.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -237,6 +238,23 @@ public class DatabaseService implements IObservable {
         System.out.println("Removing: " + event + " from database.");
         FirebaseDatabase.getInstance().getReference("events/" + event.getEventUID()).removeValueAsync();
     }
+
+    /**
+     * @param user
+     * @param message
+     */
+    public void storeMessage(User user, IMessage message) {
+
+    }
+
+    /**
+     * @param user
+     * @return
+     */
+    public ArrayList<IMessage> getMessages(User user) {
+        return null;
+    }
+
 
     /**
      * @param userUID

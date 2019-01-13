@@ -137,6 +137,10 @@ public class MessageSerializer {
                     return UnsubscribeFromEventRequest.fromJson(json);
                 case EventChat_Message:
                     return EventChatMessage.fromJson(json);
+                case SyncMissedMessagesReply_Message:
+                    return SyncMissedMessageReply.fromJson(json);
+                case SyncMissedMessagesRequest_Message:
+                    return SyncMissedMessagesRequest.fromJson(json);
             }
         }
         return null;

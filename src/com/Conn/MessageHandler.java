@@ -269,4 +269,18 @@ public class MessageHandler {
         });
     }
 
+    /**
+     * @param message
+     */
+    public void handleSyncMissedMessagesRequest(SyncMissedMessagesRequest message) {
+        CompletableFuture.runAsync(() -> {
+            User authenticatedUser = UserAuthenticationService.authenticate(message.getFireBaseToken());
+            if (authenticatedUser == null)
+                callback.onAuthenticationFailed();
+            else {
+                callback.onSyncMissedMessagesRequest();
+            }
+        });
+    }
+
 }

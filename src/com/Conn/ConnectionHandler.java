@@ -5,7 +5,6 @@ import com.Constants;
 import com.Entities.*;
 import com.Listeners.MessageCallback;
 import com.MessagingProtocol.IMessage;
-import com.MessagingProtocol.MessageType;
 import com.MessagingProtocol.Messages.Replies.*;
 import com.MessagingProtocol.Messages.Requests.*;
 import com.MessagingProtocol.Messages.Updates.*;
@@ -139,7 +138,7 @@ public class ConnectionHandler implements Runnable {
                 else
                     for (Account acc : accounts) {
                         if (acc.getUser().equals(target)) {
-                            sendViaC2DM(acc.getFireBaseMessagingId(), MessageType.UploadImageReply_Message);
+                            sendViaC2DM(acc.getFireBaseMessagingId(), new UploadImageReply("SERVER", Constants.IMAGE_SERVER_LINK + image.getName() + image.getExtension(), user), acc.getUser());
                             break;
                         }
                     }
@@ -159,7 +158,7 @@ public class ConnectionHandler implements Runnable {
                 else
                     for (Account acc : accounts) {
                         if (acc.getUser().equals(target)) {
-                            sendViaC2DM(acc.getFireBaseMessagingId(), MessageType.UploadAudioReply_Message);
+                            sendViaC2DM(acc.getFireBaseMessagingId(), new UploadAudioMessageReply("SERVER", user, Constants.AUDIO_SERVER_LINK + audio.getName() + audio.getExtension()), acc.getUser());
                             break;
                         }
                     }
@@ -179,7 +178,7 @@ public class ConnectionHandler implements Runnable {
                         else
                             for (Account acc : accounts) {
                                 if (acc.getUser().equals(friend)) {
-                                    sendViaC2DM(acc.getFireBaseMessagingId(), MessageType.UploadAudioReply_Message);
+                                    sendViaC2DM(acc.getFireBaseMessagingId(), new LocationUpdateMessage("SERVER", location, user), acc.getUser());
                                     break;
                                 }
                             }
@@ -199,8 +198,8 @@ public class ConnectionHandler implements Runnable {
                     clients.get(target.getUid()).writeMessage(new TextMessage("SERVER", textMessage, target, user));
                 else
                     for (Account acc : accounts) {
-                        if (acc.getUser().equals(target)) {
-                            sendViaC2DM(acc.getFireBaseMessagingId(), MessageType.UploadAudioReply_Message);
+                        if (acc.getUser().getUid().equals(target.getUid())) {
+                            sendViaC2DM(acc.getFireBaseMessagingId(), new TextMessage("SERVER", textMessage, target, user), acc.getUser());
                             break;
                         }
                     }
@@ -255,7 +254,7 @@ public class ConnectionHandler implements Runnable {
                     else
                         for (Account acc : accounts) {
                             if (acc.getUser().equals(target)) {
-                                sendViaC2DM(acc.getFireBaseMessagingId(), MessageType.UploadAudioReply_Message);
+                                sendViaC2DM(acc.getFireBaseMessagingId(), new FriendRequest("SERVER", user.getEmail(), user), acc.getUser());
                                 break;
                             }
                         }
@@ -330,7 +329,7 @@ public class ConnectionHandler implements Runnable {
                 List<User> users = DatabaseService.getInstance().getCachedUsers();
                 for (User user : users) {
                     Account account = DatabaseService.getInstance().getAccount(user);
-                    sendViaC2DM(account.getFireBaseMessagingId(), MessageType.EventCreationReply_Message);
+                    sendViaC2DM(account.getFireBaseMessagingId(), new EventCreationReply("SERVER", event.getEventCreator(), event.getLocation(), event.getEventName(), event.getEventUID(), event.getExpirationDateAsString()), user);
                 }
                 clients.values().forEach(client -> client.writeMessage(new EventCreationReply("SERVER", event.getEventCreator(), event.getLocation(), event.getEventName(), event.getEventUID(), event.getExpirationDateAsString())));
                 checkExpiredEvents();
@@ -395,24 +394,32 @@ public class ConnectionHandler implements Runnable {
                 DatabaseService.getInstance().insertEvent(event);
                 writeMessage(new UnsubscribeFromEventReply("SERVER", null));
             }
+
+            @Override
+            public void onSyncMissedMessagesRequest() {
+                ArrayList<IMessage> messages = DatabaseService.getInstance().getMessages(user);
+                writeMessage(new SyncMissedMessageReply("SERVER", null, messages));
+            }
         });
     }
 
     /**
      * @param fireBaseMessagingID
-     * @param messageType
+     * @param message
      */
-    private void sendViaC2DM(String fireBaseMessagingID, MessageType messageType) {
-        Message message = Message.builder()
+    private void sendViaC2DM(String fireBaseMessagingID, IMessage message, User target) {
+        DatabaseService.getInstance().storeMessage(target, message);
+
+        Message fcmMessage = Message.builder()
                 .setNotification(new Notification(
                         "Location Aware Chat",
-                        messageType.toString()
+                        message.getMessageType().toString()
                 ))
                 .setToken(fireBaseMessagingID)
                 .build();
         String response = null;
         try {
-            response = FirebaseMessaging.getInstance().send(message);
+            response = FirebaseMessaging.getInstance().send(fcmMessage);
         } catch (FirebaseMessagingException e) {
             e.printStackTrace();
         }
@@ -423,7 +430,6 @@ public class ConnectionHandler implements Runnable {
      *
      */
     private void checkExpiredEvents() {
-
         events.values().forEach(event -> {
             LocalDate expirationDate = LocalDate.parse(event.getExpirationDateAsString());
             if (expirationDate.isBefore(LocalDate.now())) {
@@ -496,6 +502,9 @@ public class ConnectionHandler implements Runnable {
                     break;
                 case EventChat_Message:
                     messageHandler.handleEventChatMessage((EventChatMessage) message);
+                    break;
+                case SyncMissedMessagesRequest_Message:
+                    messageHandler.handleSyncMissedMessagesRequest((SyncMissedMessagesRequest) message);
                     break;
             }
         }

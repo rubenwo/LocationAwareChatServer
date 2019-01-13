@@ -23,5 +23,7 @@ public enum MessageType {
     UnsubscribeFromEventReply_Message,
     GetAllEventsRequest_Message,
     GetAllEventsReply_Message,
-    EventChat_Message
+    EventChat_Message,
+    SyncMissedMessagesRequest_Message,
+    SyncMissedMessagesReply_Message
 }

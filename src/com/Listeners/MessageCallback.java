@@ -42,4 +42,6 @@ public interface MessageCallback {
     void onEventSubscriptionRequest(String eventUID);
 
     void onUnsubscribeFromEventRequest(String eventUID);
+
+    void onSyncMissedMessagesRequest();
 }
