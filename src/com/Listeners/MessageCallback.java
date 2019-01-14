@@ -44,4 +44,6 @@ public interface MessageCallback {
     void onUnsubscribeFromEventRequest(String eventUID);
 
     void onSyncMissedMessagesRequest();
+
+    void onProfilePictureUpdate(String profilePictureURL);
 }

@@ -98,9 +98,9 @@ public class ConnectionHandler implements Runnable {
             @Override
             public void onIdentificationMessage(User authenticatedUser, String fireBaseMessagingId) {
                 clients.put(authenticatedUser.getUid(), ConnectionHandler.this);
-                user = authenticatedUser;
+                user = DatabaseService.getInstance().getUser(authenticatedUser.getUid());
                 System.out.println(user.toString() + " came online.");
-                DatabaseService.getInstance().insertUser(authenticatedUser);
+                DatabaseService.getInstance().insertUser(user);
                 account = DatabaseService.getInstance().getAccount(user);
                 if (account == null) {
                     account = new Account(user);
@@ -386,6 +386,12 @@ public class ConnectionHandler implements Runnable {
                 ArrayList<IMessage> messages = DatabaseService.getInstance().getMessages(user);
                 writeMessage(new SyncMissedMessageReply("SERVER", null, messages));
             }
+
+            @Override
+            public void onProfilePictureUpdate(String profilePictureURL) {
+                user.setProfilePictureURL(profilePictureURL);
+                DatabaseService.getInstance().insertUser(user);
+            }
         });
     }
 
@@ -492,6 +498,8 @@ public class ConnectionHandler implements Runnable {
                 case SyncMissedMessagesRequest_Message:
                     messageHandler.handleSyncMissedMessagesRequest((SyncMissedMessagesRequest) message);
                     break;
+                case ProfilePictureUpdate_Message:
+                    messageHandler.handleProfilePictureUpdate((ProfilePictureUpdate) message);
             }
         }
     }

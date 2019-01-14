@@ -141,6 +141,8 @@ public class MessageSerializer {
                     return SyncMissedMessageReply.fromJson(json);
                 case SyncMissedMessagesRequest_Message:
                     return SyncMissedMessagesRequest.fromJson(json);
+                case ProfilePictureUpdate_Message:
+                    return ProfilePictureUpdate.fromJson(json);
             }
         }
         return null;

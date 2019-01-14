@@ -140,10 +140,22 @@ public class DatabaseService implements IObservable {
         System.out.println("Caching users");
         for (Map.Entry<String, User> entry : userMap.entrySet()) {
             Map singleUser = (Map) entry.getValue();
-            cachedUsers.add(new User(
-                    singleUser.get("name").toString(),
-                    singleUser.get("email").toString(),
-                    singleUser.get("uid").toString()));
+            JSONObject obj = new JSONObject(singleUser);
+
+            User user = new User(
+                    obj.get("name").toString(),
+                    obj.get("email").toString(),
+                    obj.get("uid").toString());
+            if (singleUser.containsKey("location")) {
+                JSONObject loc = obj.getJSONObject("location");
+                user.setLocation(new Location(
+                        (double) loc.get("latitude"),
+                        (double) loc.get("longitude")));
+            }
+            if (singleUser.containsKey("profilePictureURL")) {
+                user.setProfilePictureURL(obj.getString("profilePictureURL"));
+            }
+            cachedUsers.add(user);
         }
 
         observers.forEach(IObserver::notifyDataChanged);

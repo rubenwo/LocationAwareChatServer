@@ -6,6 +6,7 @@ public class User {
     private String uid;
 
     private Location location;
+    private String profilePictureURL;
 
     public User(String name, String email, String uid) {
         this.name = name;
@@ -31,6 +32,14 @@ public class User {
 
     public void setLocation(Location location) {
         this.location = location;
+    }
+
+    public String getProfilePictureURL() {
+        return profilePictureURL;
+    }
+
+    public void setProfilePictureURL(String profilePictureURL) {
+        this.profilePictureURL = profilePictureURL;
     }
 
     @Override

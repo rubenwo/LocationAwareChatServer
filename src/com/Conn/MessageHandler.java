@@ -283,4 +283,18 @@ public class MessageHandler {
         });
     }
 
+    /**
+     * @param message
+     */
+    public void handleProfilePictureUpdate(ProfilePictureUpdate message) {
+        CompletableFuture.runAsync(() -> {
+            User authenticatedUser = UserAuthenticationService.authenticate(message.getFireBaseToken());
+            if (authenticatedUser == null)
+                callback.onAuthenticationFailed();
+            else {
+                callback.onProfilePictureUpdate(message.getProfilePictureURL());
+            }
+        });
+    }
+
 }
