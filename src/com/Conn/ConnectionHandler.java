@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static java.lang.Math.*;
+
 
 public class ConnectionHandler implements Runnable {
     /**
@@ -337,22 +339,32 @@ public class ConnectionHandler implements Runnable {
              * @param content
              */
             @Override
-            public void onEventChatMessage(String eventUID, User sender, IMessage... content) {
+            public void onEventChatMessage(String eventUID, User sender, String content) {
                 Event event = events.get(eventUID);
 
-                for (IMessage msg : content) {
-                    switch (msg.getMessageType()) {
-                        case Text_Message:
-                            event.getSubscribedUserUIDs().forEach(uid -> clients.get(uid).writeMessage(msg));
-                            break;
-                        case UploadImageRequest_Message:
-                            event.getSubscribedUserUIDs().forEach(uid -> clients.get(uid).writeMessage(msg));
-                            break;
-                        case UploadAudioRequest_Message:
-                            event.getSubscribedUserUIDs().forEach(uid -> clients.get(uid).writeMessage(msg));
-                            break;
+                event.getSubscribedUserUIDs().forEach(sub -> {
+                    ConnectionHandler handler = clients.get(sub);
+                    Location eventLocation = event.getLocation();
+                    Location userLocation = handler.user.getLocation();
+                    if (userLocation != null) {
+                        double distance = calculateHaversine_km(
+                                eventLocation.getLatitude(),
+                                eventLocation.getLongitude(),
+                                userLocation.getLatitude(),
+                                userLocation.getLongitude());
+                        if (distance <= Constants.EVENT_RADIUS_KM) {
+                            if (handler != null)
+                                handler.writeMessage(new EventChatMessage("SERVER", sender, eventUID, content));
+                            else {
+                                List<User> users = DatabaseService.getInstance().getCachedUsers();
+                                for (User user : users) {
+                                    Account account = DatabaseService.getInstance().getAccount(user);
+                                    sendViaC2DM(account.getFireBaseMessagingId(), new EventCreationReply("SERVER", event.getEventCreator(), event.getLocation(), event.getEventName(), event.getEventUID(), event.getExpirationDateAsString()), user);
+                                }
+                            }
+                        }
                     }
-                }
+                });
             }
 
             /**
@@ -425,6 +437,17 @@ public class ConnectionHandler implements Runnable {
             e.printStackTrace();
         }
         System.out.println("Response from server: " + response);
+    }
+
+    private double calculateHaversine_km(double lat1, double long1, double lat2, double long2) {
+        double d2r = 0.0174532925199433;
+        double dlong = (long2 - long1) * d2r;
+        double dlat = (lat2 - lat1) * d2r;
+        double a = pow(sin(dlat / 2.0), 2) + cos(lat1 * d2r) * cos(lat2 * d2r) * pow(sin(dlong / 2.0), 2);
+        double c = 2 * atan2(sqrt(a), sqrt(1 - a));
+        double d = 6367 * c;
+
+        return d;
     }
 
     /**

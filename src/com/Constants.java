@@ -45,4 +45,5 @@ public class Constants {
      *
      */
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+    public static final double EVENT_RADIUS_KM = 5.0;
 }
