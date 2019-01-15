@@ -277,6 +277,11 @@ public class ConnectionHandler implements Runnable {
                     account.getFriends().add(friend);
                     DatabaseService.getInstance().insertAccount(account);
                     writeMessage(new FriendReply("SERVER", user, friend, true));
+
+                    ConnectionHandler handler = clients.get(friend.getUid());
+                    handler.getAccount().getFriends().add(user);
+                    DatabaseService.getInstance().insertAccount(handler.getAccount());
+                    handler.writeMessage(new FriendReply("SERVER", friend, user, true));
                 }
             }
 
