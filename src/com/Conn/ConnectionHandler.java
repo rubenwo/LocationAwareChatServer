@@ -99,6 +99,10 @@ public class ConnectionHandler implements Runnable {
             public void onIdentificationMessage(User authenticatedUser, String fireBaseMessagingId) {
                 clients.put(authenticatedUser.getUid(), ConnectionHandler.this);
                 user = DatabaseService.getInstance().getUser(authenticatedUser.getUid());
+                if (user == null) {
+                    user = authenticatedUser;
+                    DatabaseService.getInstance().insertUser(authenticatedUser);
+                }
                 System.out.println(user.toString() + " came online.");
                 DatabaseService.getInstance().insertUser(user);
                 account = DatabaseService.getInstance().getAccount(user);

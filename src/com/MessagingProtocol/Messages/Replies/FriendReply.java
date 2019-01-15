@@ -20,8 +20,8 @@ public class FriendReply implements IMessage {
         this.approved = approved;
     }
 
-    public static FriendsReply fromJson(String json) {
-        return Constants.GSON.fromJson(json, FriendsReply.class);
+    public static FriendReply fromJson(String json) {
+        return Constants.GSON.fromJson(json, FriendReply.class);
     }
 
     @Override
