@@ -72,6 +72,10 @@ public class Account {
         this.subscribedEvents = subscribedEvents;
     }
 
+    public void setUser(User user) {
+        this.user = user;
+    }
+
     @Override
     public String toString() {
         return "Account{" +

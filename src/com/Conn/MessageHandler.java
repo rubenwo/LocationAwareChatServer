@@ -65,6 +65,7 @@ public class MessageHandler {
      * @param message
      */
     public void handleLocationUpdateMessage(LocationUpdateMessage message) {
+        System.out.println("In handleLocationUpdateMessage");
         CompletableFuture.runAsync(() -> {
             User authenticatedUser = UserAuthenticationService.authenticate(message.getFireBaseToken());
             if (authenticatedUser == null)

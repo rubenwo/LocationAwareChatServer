@@ -163,6 +163,11 @@ public class ConnectionHandler implements Runnable {
              */
             @Override
             public void onLocationUpdateMessage(Location location) {
+                System.out.println("In onLocationUpdateMessage " + location);
+                user.setLocation(location);
+                account.setUser(user);
+                DatabaseService.getInstance().insertUser(user);
+                DatabaseService.getInstance().insertAccount(account);
                 if (account != null) {
                     for (User friend : account.getFriends()) {
                         if (clients.containsKey(friend.getUid()))
@@ -176,7 +181,6 @@ public class ConnectionHandler implements Runnable {
                             }
                     }
                 }
-                user.setLocation(location);
             }
 
             /**
